@@ -1,3 +1,3 @@
 # MIRAGE
 
-To be uploaded upon publication of the manuscript.
+To be uploaded upon acceptance of the manuscript.
