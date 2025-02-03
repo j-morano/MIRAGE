@@ -4,6 +4,9 @@ This repository contains the code for the paper "MIRAGE: A multimodal foundation
 
 MIRAGE is a multimodal foundation model for comprehensive retinal OCT image analysis. It is trained on a large-scale dataset of multimodal data, and is designed to perform a wide range of tasks, including disease staging, diagnosis, and layer and lesion segmentation. MIRAGE is based on the MultiMAE architecture, and is pre-trained using a multi-task learning strategy. The model is available in two sizes: MIRAGE-Base and MIRAGE-Large. The code in this repository provides the model weights and the code to run inference.
 
+> [!IMPORTANT]
+> This repository is under construction. The training and evaluation code will be added upon acceptance of the paper.
+
 
 ## TODO
 
