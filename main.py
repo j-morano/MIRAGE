@@ -110,12 +110,12 @@ class MIRAGEWrapper(nn.Module):
         all_tokens=False,
         modalities="bscan",
         weights=None,
-        map_location="cpu",
+        device="cuda",
     ):
         super().__init__()
 
         assert weights is not None
-        state_dict = torch.load(weights, map_location=map_location, weights_only=False)
+        state_dict = torch.load(weights, map_location=device, weights_only=False)
         model_state_dict = state_dict["model"]
 
         self.args = state_dict["args"]
@@ -148,6 +148,7 @@ class MIRAGEWrapper(nn.Module):
         self.all_tokens = all_tokens
         print('>> Loading weights from:', weights)
         self.model.load_state_dict(model_state_dict, strict=True)
+        self.model.to(device)
 
     def forward(self, x: dict):
         """
@@ -158,8 +159,6 @@ class MIRAGEWrapper(nn.Module):
         Returns:
             (B, C, H, W) tensor
         """
-        for k, v in x.items():
-            x[k] = v.to(self.device)
         masks = {}
         for k in self.args.in_domains:
             if k not in x:
@@ -173,6 +172,7 @@ class MIRAGEWrapper(nn.Module):
             print('Input:', k, x[k].shape, x[k].min(), x[k].max())
             mask = np.full(self.args.grid_size[k], fill_v)
             masks[k] = torch.LongTensor(mask).flatten()[None].to(self.device)
+            x[k] = x[k].to(self.device)
         preds, _masks = self.model(
             x,
             mask_inputs=False,
@@ -210,11 +210,10 @@ def to_tensor(fn):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--features', action='store_true', help='Extract features only')
-    parser.add_argument('--model_size', type=str, default='base', help='Model size: base or large')
+    parser.add_argument('--model_size', type=str, default='base', help='Model size', choices=['base', 'large'])
     parser.add_argument('--image_path', type=str, default='./_example_images', help='Path to input images')
+    parser.add_argument('--device', type=str, default='cuda', help='Device to use', choices=['cuda', 'cpu'])
     args = parser.parse_args()
-
-    assert args.model_size in ['base', 'large']
 
     # NOTE: ViT-Base and ViT-Large versions of MIRAGE are available
     if args.model_size == 'base':
@@ -222,10 +221,12 @@ if __name__ == "__main__":
     else:
         weights = './__weights/MIRAGE-Large.pth'
 
-    model = MIRAGEWrapper(weights=weights)
+    model = MIRAGEWrapper(weights=weights, device=args.device)
     model.eval()
     if args.features:
         model.model.output_adapters = None
+
+    print(f'Using device: {model.device}')
 
     for fsid in Path(args.image_path).iterdir():
         bscan = to_tensor(fsid / 'bscan.npy')
