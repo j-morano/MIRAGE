@@ -23,9 +23,9 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 
 - [x] Basic code to load the model and run inference
 - [x] Model weights
-- [ ] Pretraining code
 - [x] Downstream classification datasets
 - [x] Downstream segmentation datasets
+- [ ] Pretraining code
 - [ ] Classification evaluation code
 - [ ] Segmentation evaluation code
 - [ ] Detailed classification results
