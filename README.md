@@ -10,7 +10,8 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image 
 
 ## Overview
 
-![image](https://github.com/user-attachments/assets/622f9623-27fc-4f7f-bd17-b93698fff39e)
+![image](https://github.com/user-attachments/assets/23f4b21c-973d-4700-9e8f-d561b05dc043)
+
 
 **Overview of the proposed model (MIRAGE) and other general (DINOv2) and domain-specific (MedSAM, RETFound) foundation models.**
 In contrast to existing unimodal foundation models, our approach utilizes multimodal self-supervised learning to train a Vision Transformer on a large dataset of paired multimodal retinal images, including optical coherence tomography (OCT), scanning laser ophthalmoscopy (SLO), and automatically generated labels for retinal layers.
