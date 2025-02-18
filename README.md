@@ -57,8 +57,7 @@ The model weights are available in the [Model weights release](https://github.co
 ## Benchmark
 
 We provide all the publicly available datasets used in the benchmark with the data splits.
-See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) for more details on the segmentation benchmark.
-<!-- and [docs/classification_benchmark.md](docs/classification_benchmark.md) for more details on the classification and segmentation benchmarks, respectively. -->
+See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/classification_benchmark.md](docs/classification_benchmark.md) for more details on the classification and segmentation benchmarks, respectively.
 
 
 ## Citation
