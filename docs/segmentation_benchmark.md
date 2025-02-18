@@ -80,7 +80,7 @@ Example `INFO.json` (from GOALS):
 ```
 
 > [!IMPORTANT]
-> RETOUCH dataset does not have a `semseg` folder because the test segmentation masks are not available. The evaluation was performed on the Grand Challenge platform (<https://retouch.grand-challenge.org/>).
+> RETOUCH dataset does not have a `semseg` folder under `test` because the test segmentation masks are not available. The evaluation was performed on the Grand Challenge platform (<https://retouch.grand-challenge.org/>).
 
 
 ### Evaluation-only dataset
