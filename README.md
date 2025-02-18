@@ -35,10 +35,19 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 
 ## Requirements
 
-The code has been tested with PyTorch 2.5.1 (CUDA 11.8) and Python 3.10.10.
+> [!NOTE]
+> The code has been tested with PyTorch 2.5.1 (CUDA 11.8) and Python 3.10.10.
 
 
-To install the required packages, run:
+### pip
+
+Create a new python environment and activate it:
+```bash
+python -m venv env  # if not already created
+source env/bin/activate
+```
+
+Install the required packages:
 ```bash
 pip install -r requirements.txt
 ```
@@ -62,7 +71,7 @@ See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/c
 
 ## Citation
 
-If you use this code or the model weights, please cite the following paper:
+If you find this repository useful, please consider giving it a star ⭐ and a citation:
 
 ```
 @article{morano2025mirage,
