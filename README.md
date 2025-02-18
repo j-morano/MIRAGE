@@ -12,10 +12,13 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT image anal
 
 - [x] Basic code to load the model and run inference
 - [x] Model weights
-- [ ] Training code
-- [ ] Evaluation code
-- [ ] Downstream datasets
-- [ ] Detailed results
+- [ ] Pretraining code
+- [ ] Downstream classification datasets
+- [ ] Downstream segmentation datasets
+- [ ] Classification evaluation code
+- [ ] Segmentation evaluation code
+- [ ] Detailed classification results
+- [ ] Detailed segmentation results
 
 
 
@@ -32,12 +35,12 @@ pip install -r requirements.txt
 
 ## Model weights
 
-The model weights are available at Google Drive:
+The model weights are available in the [Model weights release](https://github.com/j-morano/MIRAGE/releases/tag/weights) on GitHub.
 
 | Model | Link |
 | --- | --- |
-| MIRAGE-Base | [Weights](https://drive.google.com/file/d/1x0Z8jz6jMOYfDdxFrFSORFEvVz6_Jdns/view?usp=sharing) |
-| MIRAGE-Large | [Weights](https://drive.google.com/file/d/1b34P2LixvRknYAqaWVMmZkCkm4XKn4MV/view?usp=sharing) |
+| MIRAGE-Base | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Base.pth) |
+| MIRAGE-Large | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Large.pth) |
 
 
 ## Becnchmark
