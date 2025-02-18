@@ -1,4 +1,4 @@
-# MIRAGE - Benckmark
+# MIRAGE - Segmentation benckmark
 
 
 ## Download
