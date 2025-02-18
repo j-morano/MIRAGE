@@ -75,7 +75,7 @@ If you find this repository useful, please consider giving it a star ⭐ and a c
 
 ```
 @article{morano2025mirage,
-  title={MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis},
+  title={{MIRAGE}: A multimodal foundation model and benchmark for comprehensive retinal {OCT} image analysis},
   author={José Morano
   and Botond Fazekas
   and Emese Sükei
