@@ -107,7 +107,7 @@ Dataset/
 Large datasets (Duke iAMD and RETOUCH) are split into multiple parts using the Linux `split` command.
 
 ```shell
-split -b $(( $(stat -c%s Duke_iAMD_labeled.zip) / 8 + 1 )) Duke_iAMD_labeled.zip Duke_iAMD_labeled_part_`
+split -b $(( $(stat -c%s Duke_iAMD_labeled.zip) / 8 + 1 )) Duke_iAMD_labeled.zip Duke_iAMD_labeled_part_
 split -b $(( $(stat -c%s RETOUCH.zip) / 2 + 1 )) RETOUCH.zip RETOUCH_part_
 ```
 
