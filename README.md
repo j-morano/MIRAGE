@@ -71,7 +71,7 @@ See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/c
 
 ## Citation
 
-If you find this repository useful, please consider giving it a star ⭐ and a citation:
+If you find this repository useful, please consider giving it a star ⭐ and a citation 📝:
 
 ```
 @article{morano2025mirage,
