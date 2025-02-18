@@ -43,7 +43,7 @@ The model weights are available in the [Model weights release](https://github.co
 | MIRAGE-Large | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Large.pth) |
 
 
-## Becnchmark
+## Benchmark
 
 We provide all the publicly available datasets used in the benchmark with the data splits.
 See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) for more details on the segmentation benchmark.
