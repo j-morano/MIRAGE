@@ -25,7 +25,7 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 - [x] Model weights
 - [x] Downstream classification datasets
 - [x] Downstream segmentation datasets
-- [ ] Pretraining code
+<!-- - [ ] Pretraining code -->
 - [ ] Classification evaluation code
 - [ ] Segmentation evaluation code
 - [ ] Detailed classification results
@@ -95,7 +95,8 @@ If you find this repository useful, please consider giving it a star ⭐ and a c
 
 ## Acknowledgements
 
-MIRAGE code is mainly based on MultiMAE code base, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, and MAE.
+MIRAGE code is mainly based on MultiMAE code base, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, mmsegmentation and other repositories.
+We thank the authors for making their code available.
 
 * <https://github.com/EPFL-VILAB/MultiMAE>
 * <https://github.com/rwightman/pytorch-image-models/tree/master/timm>
@@ -105,3 +106,4 @@ MIRAGE code is mainly based on MultiMAE code base, along with timm, DeiT, DINO, 
 * <https://github.com/microsoft/unilm/tree/master/beit>
 * <https://github.com/BUPT-PRIV/MAE-priv>
 * <https://github.com/facebookresearch/mae>
+* <https://github.com/open-mmlab/mmsegmentation>
