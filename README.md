@@ -13,7 +13,6 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image 
 ![Overview](https://github.com/user-attachments/assets/cc9f1d37-3097-4ffb-8e1d-78f176d4e4f0)
 
 
-
 **Overview of the proposed model (MIRAGE) and other general (DINOv2) and domain-specific (MedSAM, RETFound) foundation models.**
 In contrast to existing unimodal foundation models, our approach utilizes multimodal self-supervised learning to train a Vision Transformer on a large dataset of paired multimodal retinal images, including optical coherence tomography (OCT), scanning laser ophthalmoscopy (SLO), and automatically generated labels for retinal layers.
 We evaluated the model on a comprehensive benchmark consisting of 19 tasks from 14 publicly available datasets and two private datasets, covering both OCT and SLO classification and segmentation tasks. Statistical significance was calculated using the Wilcoxon signed-rank test across all datasets.
@@ -26,11 +25,11 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 - [x] Model weights
 - [x] Downstream classification datasets
 - [x] Downstream segmentation datasets
-<!-- - [ ] Pretraining code -->
-- [ ] Classification evaluation code
 - [ ] Segmentation evaluation code
-- [ ] Detailed classification results
 - [ ] Detailed segmentation results
+- [ ] Classification evaluation code
+- [ ] Detailed classification results
+- [ ] Pretraining code
 
 
 
@@ -92,11 +91,15 @@ If you find this repository useful, please consider giving it a star ⭐ and a c
 }
 ```
 
+## License
+
+This project is under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for details.
+
 
 
 ## Acknowledgements
 
-MIRAGE code is mainly based on MultiMAE code base, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, mmsegmentation and other repositories.
+MIRAGE code is mainly based on MultiMAE, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, and mmsegmentation.
 We thank the authors for making their code available.
 
 * <https://github.com/EPFL-VILAB/MultiMAE>
