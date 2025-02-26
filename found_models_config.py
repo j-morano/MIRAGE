@@ -139,6 +139,23 @@ class MedSAMFM(FoundModel):
         return checkpoint_model
 
 
+@add_fm('visionfm')
+class VisionFMFM(FoundModel):
+    def __init__(self, norm='visionfm', model='miragelight_base'):
+        super().__init__(norm, model)
+
+    @staticmethod
+    def loader(checkpoint):
+        print(">> Loading weights from VisionFM")
+        checkpoint_model = checkpoint['teacher']
+        for key in list(checkpoint_model.keys()):
+            if 'backbone.blocks.' in key:
+                checkpoint_model[key.replace('backbone.blocks.', 'encoder.')] = checkpoint_model.pop(key)
+            if 'backbone.cls_token' in key:
+                checkpoint_model[key.replace('backbone.cls_token', 'global_tokens')] = checkpoint_model.pop(key)
+        return checkpoint_model
+
+
 @add_fm('mirage-large')
 class MIRAGELargeFM(FoundModel):
     def __init__(self, norm='minmax', model='miragelight_large'):
