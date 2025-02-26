@@ -38,7 +38,7 @@ from mutils.optim_factory import LayerDecayValueAssigner, create_optimizer
 from mutils.semseg_metrics import mean_iou
 from mutils.gdice import CEGDiceLoss
 from mutils.misc import fix_seeds
-from found_models_config import fm_factory
+from fm_seg_config import fm_factory
 
 
 

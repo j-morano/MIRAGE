@@ -59,7 +59,7 @@ To add a new dataset, you need to respect the dataset structure indicated in [do
 
 ### Adding a new model
 
-To add a new model, you need to create a new model class in `found_models_config.py` extending the `FoundModel` class in the same file.
+To add a new model, you need to create a new model class in `fm_seg_config.py` extending the `FoundModel` class in the same file.
 Your model has to be compatible with the input (patchifier+projector) and output adapters (decoders) used in our codebase.
 In general, this means that it has to accept and return tensors of shape `(B, T, D)`, where `B` is the batch size, `T` is the sequence length (number of patches + 1 for the global token), and `D` is the feature dimension. For example, MIRAGE-Base uses by default a sequence length of 1025 (`(image_size // patch_size) ** 2 + 1`, with `image_size=1024` and `patch_size=32`), and a feature dimension of 768.
 You can check `MIRAGELight` in [mirage/model.py](../mirage/model.py) for more details on the model structure.
