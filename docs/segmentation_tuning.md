@@ -5,12 +5,12 @@ This repository provides the code to fine-tune MIRAGE and other state-of-the-art
 
 ## Requirements
 
-See the [main README](../README.md#requirements) for the requirements.
+See [README#Requirements](../README.md#requirements) for the requirements.
 
 
 ## Data
 
-The OCT segmentation datasets are available in [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md).
+The OCT segmentation datasets are available in [docs/segmentation_benchmark.md](../docs/segmentation_benchmark.md).
 
 
 ## Usage
