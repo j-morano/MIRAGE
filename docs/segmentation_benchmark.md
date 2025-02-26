@@ -93,7 +93,6 @@ Dataset/
     |    |-- img_id_0.png
     |    |-- img_id_1.png
     |    | ...
-    |
     |-- semseg/
     |    |-- img_id_0.png
     |    |-- img_id_1.png

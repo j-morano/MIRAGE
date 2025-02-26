@@ -37,6 +37,7 @@ from mutils.datasets_semseg import build_semseg_dataset, simple_transform
 from mutils.optim_factory import LayerDecayValueAssigner, create_optimizer
 from mutils.semseg_metrics import mean_iou
 from mutils.gdice import CEGDiceLoss
+from mutils.misc import fix_seeds
 from found_models_config import fm_factory
 
 
@@ -55,7 +56,7 @@ def get_args():
     )
 
     parser = argparse.ArgumentParser(
-        'MultiMAE semantic segmentation fine-tuning script',
+        'MIRAGE semantic segmentation fine-tuning script',
         add_help=True,
         formatter_class=SortingHelpFormatter
     )
@@ -227,7 +228,7 @@ def get_args():
 
     # Runtime parameters
     parser.add_argument(
-        '--base_output_dir', default='./__output', type=str,
+        '--base_output_dir', default='./__output_seg', type=str,
         help='Base output directory. (default: %(default)s)'
     )
     parser.add_argument(
@@ -402,14 +403,7 @@ def process_args(args):
 def main(args):
     device = torch.device(args.device)
 
-    # Fix the seed for reproducibility
-    seed = args.seed
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-
-    cudnn.deterministic = True
-    cudnn.benchmark = True
+    fix_seeds(args.seed)
 
     model_config = None
     for kw in fm_factory.keys():
