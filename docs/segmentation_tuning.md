@@ -30,7 +30,7 @@ Below we provide an example to fine-tune MIRAGE (both Base and Large) on the Duk
         './__weights/MIRAGE-Base.pth' \
         './__weights/MIRAGE-Large.pth' \
     --data_path '_Data/Segmentation/Duke_DME/' \
-    --version v1 \
+    --version v1
 ```
 
 You can run `python run_seg_tuning.py --help` to see the available arguments and their descriptions.
