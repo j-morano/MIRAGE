@@ -15,7 +15,7 @@ The OCT segmentation datasets are available in [docs/segmentation_benchmark.md](
 
 ## Usage
 
-The script `run_seg_tuning.py` provides the main entry point to tune the models. The script supports several command-line arguments to configure the training process. In addition, configuration files (in YAML) can be used to specify theses arguments. The default configuration, used for the experiments in the paper, is available in [_cfgs/ft_semseg_200e_convnext.yaml](../_cfgs/ft_semseg_200e_convnext.yaml).
+The script `run_seg_tuning.py` provides the main entry point to tune the models. It supports several command-line arguments to configure the training process. In addition, configuration files (in YAML) can be used to specify theses arguments. The default configuration, used for the experiments in the paper, is available in [_cfgs/ft_semseg_200e_convnext.yaml](../_cfgs/ft_semseg_200e_convnext.yaml).
 
 We also provide the utility script `runner` to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
