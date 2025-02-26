@@ -13,24 +13,27 @@ class PatchedInputAdapter(nn.Module):
     """Adapter for spatial inputs, like images or feature maps.
     Creates tokens from patches over the image.
 
-    :param num_channels: Number of input channels of the image/feature map
-    :param stride_level: Stride level compared to the full-sized image.
-        E.g. 4 for 1/4th the size of the image.
-    :param patch_size_full: Int or tuple of the patch size over the full image size.
-        Patch size for smaller inputs will be computed accordingly.
-    :param dim_tokens: Dimension of output tokens. Can be set using init method.
-    :param sincos_pos_emb: Set to True (default) to use fixed 2D sin-cos positional embeddings
-    :param learnable_pos_emb: Set to True to learn positional embeddings instead
-    :param image_size: Default image size. Used to initialize size of positional embeddings.
+    Args:
+        num_channels: Number of input channels of the image/feature map
+        stride_level: Stride level compared to the full-sized image.
+            E.g. 4 for 1/4th the size of the image.
+        patch_size_full: Int or tuple of the patch size over the full image size.
+            Patch size for smaller inputs will be computed accordingly.
+        dim_tokens: Dimension of output tokens. Can be set using init method.
+        sincos_pos_emb: Set to True (default) to use fixed 2D sin-cos positional embeddings
+        learnable_pos_emb: Set to True to learn positional embeddings instead
+        image_size: Default image size. Used to initialize size of positional embeddings.
     """
-    def __init__(self,
-                 num_channels: int,
-                 stride_level: int,
-                 patch_size_full: Union[int, Tuple[int,int]],
-                 dim_tokens: Optional[int] = None,
-                 sincos_pos_emb: bool = True,
-                 learnable_pos_emb: bool = False,
-                 image_size: Union[int, Tuple[int]] = 224):
+    def __init__(
+        self,
+        num_channels: int,
+        stride_level: int,
+        patch_size_full: Union[int, Tuple[int,int]],
+        dim_tokens: Optional[int] = None,
+        sincos_pos_emb: bool = True,
+        learnable_pos_emb: bool = False,
+        image_size: Union[int, Tuple[int]] = 224
+    ):
 
         super().__init__()
         self.num_channels = num_channels
@@ -55,7 +58,8 @@ class PatchedInputAdapter(nn.Module):
         Initialize parts of encoder that are dependent on dimension of tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens: Dimension of tokens
+        Args:
+            dim_tokens: Dimension of tokens
         """
         self.dim_tokens = dim_tokens
 
@@ -85,7 +89,8 @@ class PatchedInputAdapter(nn.Module):
         Forward pass through input adapter, transforming image to sequence of tokens.
         Adds task and positional encodings.
 
-        :param x: Input image tensor
+        Args:
+            x: Input image tensor
         """
         _B, _C, H, W = x.shape
         assert self.dim_tokens is not None, 'Need to call init(dim_tokens) function first'
@@ -105,39 +110,39 @@ class PatchedInputAdapter(nn.Module):
         return x
 
 
-
-
 class SemSegInputAdapter(nn.Module):
     """
     Adapter for spatial inputs, like images or feature maps.
     Creates tokens from patches over the image.
 
-    :param num_classes: Number of input semantic classes
-    :param stride_level: Stride level compared to the full-sized image.
-        E.g. 4 for 1/4th the size of the image.
-    :param patch_size_full: Int or tuple of the patch size over the full image size.
-        Patch size for smaller inputs will be computed accordingly.
-    :param dim_tokens: Dimension of output tokens. Can be set using init method.
-    :param sincos_pos_emb: Set to True (default) to use fixed 2D sin-cos positional embeddings
-    :param learnable_pos_emb: Set to True to learn positional embeddings instead
-    :param image_size: Default image size. Used to initialize size of positional embeddings.
-    :param dim_class_emb: Dimension of learned class embedding
-    :param interpolate_class_emb: Set to True to average pool class embeddings of each patch
-    :param emb_padding_idx: Padding index (e.g. image border), default is None
+    Args:
+        num_classes: Number of input semantic classes
+        stride_level: Stride level compared to the full-sized image.
+            E.g. 4 for 1/4th the size of the image.
+        patch_size_full: Int or tuple of the patch size over the full image size.
+            Patch size for smaller inputs will be computed accordingly.
+        dim_tokens: Dimension of output tokens. Can be set using init method.
+        sincos_pos_emb: Set to True (default) to use fixed 2D sin-cos positional embeddings
+        learnable_pos_emb: Set to True to learn positional embeddings instead
+        image_size: Default image size. Used to initialize size of positional embeddings.
+        dim_class_emb: Dimension of learned class embedding
+        interpolate_class_emb: Set to True to average pool class embeddings of each patch
+        emb_padding_idx: Padding index (e.g. image border), default is None
     """
 
-    def __init__(self,
-                 num_classes: int,
-                 stride_level: int,
-                 patch_size_full: Union[int, Tuple[int, int]],
-                 dim_tokens: Optional[int] = None,
-                 sincos_pos_emb: int = True,
-                 learnable_pos_emb: int = False,
-                 image_size: Union[int, Tuple[int]] = 224,
-                 dim_class_emb: int = 64,
-                 interpolate_class_emb: bool = False,
-                 emb_padding_idx: int = None
-                 ):
+    def __init__(
+        self,
+        num_classes: int,
+        stride_level: int,
+        patch_size_full: Union[int, Tuple[int, int]],
+        dim_tokens: Optional[int] = None,
+        sincos_pos_emb: int = True,
+        learnable_pos_emb: int = False,
+        image_size: Union[int, Tuple[int]] = 224,
+        dim_class_emb: int = 64,
+        interpolate_class_emb: bool = False,
+        emb_padding_idx: int = None
+    ):
         super().__init__()
         self.num_classes = num_classes
         self.stride_level = stride_level
@@ -166,7 +171,8 @@ class SemSegInputAdapter(nn.Module):
         Initialize parts of encoder that are dependent on dimension of tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens: Dimension of tokens
+        Args:
+            dim_tokens: Dimension of tokens
         '''
         self.dim_tokens = dim_tokens
 
@@ -198,7 +204,7 @@ class SemSegInputAdapter(nn.Module):
                 kernel_size=(self.P_H, self.P_W), stride=(self.P_H, self.P_W)
             )
 
-    @torch.jit.ignore
+    @torch.jit.ignore  # type: ignore
     def no_weight_decay(self):
         return {'pos_emb', 'class_emb'}
 
@@ -207,7 +213,8 @@ class SemSegInputAdapter(nn.Module):
         Forward pass through input adapter, transforming image to sequence of tokens.
         Adds task and positional encodings.
 
-        :param x: Input image tensor
+        Args:
+            x: Input image tensor
         '''
         _B, H, W = x.shape
         assert self.dim_tokens is not None, 'Need to call init(dim_tokens) function first'
@@ -229,5 +236,4 @@ class SemSegInputAdapter(nn.Module):
         x = x_patch + x_pos_emb
 
         return x
-
 

@@ -22,51 +22,53 @@ from .output_adapter_utils import (
 class SpatialOutputAdapter(nn.Module):
     """Cross-attention adapter for spatial outputs, like images or feature maps.
 
-    :param num_channels: Number of input channels of the image/feature map
-    :param stride_level: Stride level compared to the full-sized image.
-        E.g. 4 for 1/4th the size of the image.
-    :param patch_size_full: Int or tuple of the patch size over the full image size.
-        Patch size for smaller inputs will be computed accordingly.
-    :param dim_tokens_enc: Dimension of tokens coming from encoder. Can be set using init method.
-    :param dim_tokens: Dimension of decoder tokens
-    :param depth: Number of additional (full self-attention) transformer layers after initial cross attention and MLP
-    :param learnable_pos_emb: Set to True to learn positional embeddings instead
-    :param image_size: Default image size. Used to initialize size of positional embeddings.
-    :param mlp_ratio: MLP hidden dim ratio
-    :param num_heads: Number of attention heads
-    :param qkv_bias: Set to True to enable bias
-    :param drop_rate: Probability of dropping attention layer outputs
-    :param attn_drop_rate: Probability of dropping attention matrix elements
-    :param drop_path_rate: DropPath drop rate
-    :param norm_layer: Type of normalization layer
-    :param use_task_queries: When set to True, adds task specific tokens from encoder (if available)
-        to the corresponding query entries
-    :param task: Task for which encoder tokens are added to the queries of the decoder (e.g. RGB if decoder is used for RGB)
-    :param context_tasks: Tasks / modalities from the encoder. Used to create learned embeddings for each task.
-    :param use_xattn: When set to True, attend to the tokens from the encoder through a cross-attention layer
+    Args:
+        num_channels: Number of input channels of the image/feature map
+        stride_level: Stride level compared to the full-sized image.
+            E.g. 4 for 1/4th the size of the image.
+        patch_size_full: Int or tuple of the patch size over the full image size.
+            Patch size for smaller inputs will be computed accordingly.
+        dim_tokens_enc: Dimension of tokens coming from encoder. Can be set using init method.
+        dim_tokens: Dimension of decoder tokens
+        depth: Number of additional (full self-attention) transformer layers after initial cross attention and MLP
+        learnable_pos_emb: Set to True to learn positional embeddings instead
+        image_size: Default image size. Used to initialize size of positional embeddings.
+        mlp_ratio: MLP hidden dim ratio
+        num_heads: Number of attention heads
+        qkv_bias: Set to True to enable bias
+        drop_rate: Probability of dropping attention layer outputs
+        attn_drop_rate: Probability of dropping attention matrix elements
+        drop_path_rate: DropPath drop rate
+        norm_layer: Type of normalization layer
+        use_task_queries: When set to True, adds task specific tokens from encoder (if available)
+            to the corresponding query entries
+        task: Task for which encoder tokens are added to the queries of the decoder (e.g. RGB if decoder is used for RGB)
+        context_tasks: Tasks / modalities from the encoder. Used to create learned embeddings for each task.
+        use_xattn: When set to True, attend to the tokens from the encoder through a cross-attention layer
     """
 
-    def __init__(self,
-                 num_channels: int,
-                 stride_level: int,
-                 patch_size_full: Union[int, Tuple[int, int]],
-                 dim_tokens_enc: Optional[int] = None,
-                 dim_tokens: int = 256,
-                 depth: int = 0,
-                 learnable_pos_emb: int = False,
-                 image_size: Union[int, Tuple[int, int]] = 224,
-                 mlp_ratio: int = 4,
-                 num_heads: int = 8,
-                 qkv_bias: bool = True,
-                 drop_rate: float = 0.0,
-                 attn_drop_rate: float = 0.0,
-                 drop_path_rate: float = 0.0,
-                 norm_layer: Callable = partial(nn.LayerNorm, eps=1e-6),
-                 use_task_queries: bool = True,
-                 task: Optional[str] = None,
-                 context_tasks: Optional[list] = None,
-                 use_xattn: bool = True
-                 ):
+    def __init__(
+        self,
+        num_channels: int,
+        stride_level: int,
+        patch_size_full: Union[int, Tuple[int, int]],
+        dim_tokens_enc: Optional[int] = None,
+        dim_tokens: int = 256,
+        depth: int = 0,
+        learnable_pos_emb: int = False,
+        image_size: Union[int, Tuple[int, int]] = 224,
+        mlp_ratio: int = 4,
+        num_heads: int = 8,
+        qkv_bias: bool = True,
+        drop_rate: float = 0.0,
+        attn_drop_rate: float = 0.0,
+        drop_path_rate: float = 0.0,
+        norm_layer: Callable = partial(nn.LayerNorm, eps=1e-6),
+        use_task_queries: bool = True,
+        task: Optional[str] = None,
+        context_tasks: Optional[list] = None,
+        use_xattn: bool = True
+    ):
         super().__init__()
         self.num_channels = num_channels
         self.stride_level = stride_level
@@ -143,12 +145,13 @@ class SpatialOutputAdapter(nn.Module):
             self.init(dim_tokens_enc=self.dim_tokens_enc)
 
     def init(self, dim_tokens_enc: int = 768):
-        '''
+        """
         Initialize parts of decoder that are dependent on dimension of encoder tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens_enc: Dimension of tokens coming from encoder
-        '''
+        Args:
+            dim_tokens_enc: Dimension of tokens coming from encoder
+        """
         self.dim_tokens_enc = dim_tokens_enc
 
         # Projection of encoder tokens to the patch dimension
@@ -242,20 +245,22 @@ class SpatialOutputAdapter(nn.Module):
 
         return queries, context_tokens
 
-    def forward(self,
-                encoder_tokens: torch.Tensor,
-                input_info: Dict,
-                ids_keep: torch.Tensor,
-                ids_restore: torch.Tensor,
-                ):
+    def forward(
+        self,
+        encoder_tokens: torch.Tensor,
+        input_info: Dict,
+        ids_keep: torch.Tensor,
+        ids_restore: torch.Tensor
+    ):
         """
         Forward pass taking output tokens from encoder and optionally a subset of them corresponding
         to this output adapter's task (needs an additional mask describing position of these tokens in the queries).
 
-        :param encoder_tokens: Output of encoder
-        :param input_info: Dictionary with information about the input modalities
-        :param ids_keep: IDs of unmasked tokens (tokens given to the encoder)
-        :param ids_restore: IDs to unshuffle tokens
+        Args:
+            encoder_tokens: Output of encoder
+            input_info: Dictionary with information about the input modalities
+            ids_keep: IDs of unmasked tokens (tokens given to the encoder)
+            ids_restore: IDs to unshuffle tokens
         """
         assert self.dim_tokens_enc is not None, 'Need to call init(dim_tokens_enc) function first'
         H, W = input_info['tasks'][self.task]['image_size']
@@ -322,38 +327,39 @@ class SegmenterMaskTransformerAdapter(Adapter):
 
     This head is the implementation of `Segmenter:　<https://arxiv.org/abs/2105.05633>`_.
 
-    :param num_classes: Number of classes
-    :param depth: Depth of decoder
-    :param num_heads: Number of attention heads
-    :param embed_dim: Dimension of decoder tokens
-    :param mlp_ratio: MLP hidden dim ratio
-    :param drop_path_rate: DropPath drop rate
-    :param drop_rate: Dropout after MLPs and Attention
-    :param attn_drop_rate: Attention matrix drop rate
-    :param qkv_bias: Set to False to disable bias
-    :param main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
-    :param patch_size: Size of patches
-    :param task: Decoder task
-    :param norm_layer: Type of normalization layer
+    Args:
+        num_classes: Number of classes
+        depth: Depth of decoder
+        num_heads: Number of attention heads
+        embed_dim: Dimension of decoder tokens
+        mlp_ratio: MLP hidden dim ratio
+        drop_path_rate: DropPath drop rate
+        drop_rate: Dropout after MLPs and Attention
+        attn_drop_rate: Attention matrix drop rate
+        qkv_bias: Set to False to disable bias
+        main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
+        patch_size: Size of patches
+        task: Decoder task
+        norm_layer: Type of normalization layer
     """
 
     def __init__(
-            self,
-            num_classes,
-            depth: int = 2,
-            num_heads: int = 12,
-            embed_dim: int = 768,
-            mlp_ratio=4,
-            drop_path_rate=0.1,
-            drop_rate=0.0,
-            attn_drop_rate=0.0,
-            qkv_bias=True,
-            main_tasks: Union[tuple, list] = ('bscan',),
-            patch_size: Union[tuple, list] = [16, 16],
-            task: str = 'semseg',
-            image_size: Optional[Tuple[int, int]] = None,
-            norm_layer: partial[nn.Module] = partial(nn.LayerNorm, eps=1e-6),
-            **kwargs,
+        self,
+        num_classes,
+        depth: int = 2,
+        num_heads: int = 12,
+        embed_dim: int = 768,
+        mlp_ratio=4,
+        drop_path_rate=0.1,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        qkv_bias=True,
+        main_tasks: Union[tuple, list] = ('bscan',),
+        patch_size: Union[tuple, list] = [16, 16],
+        task: str = 'semseg',
+        image_size: Optional[Tuple[int, int]] = None,
+        norm_layer: partial[nn.Module] = partial(nn.LayerNorm, eps=1e-6),
+        **kwargs,
     ):
         super().__init__(main_tasks)
         self.main_tasks = main_tasks
@@ -385,7 +391,8 @@ class SegmenterMaskTransformerAdapter(Adapter):
         Initialize parts of decoder that are dependent on dimension of encoder tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens_enc: Dimension of tokens coming from encoder
+        Args:
+            dim_tokens_enc: Dimension of tokens coming from encoder
         """
         self.in_channels = dim_tokens_enc * len(self.main_tasks)
 
@@ -430,29 +437,30 @@ class SegmenterMaskTransformerAdapter(Adapter):
 class ConvNeXtAdapter(Adapter):
     """Output adapter with ConvNext blocks for semantic segmentation
 
-    :param num_classes: Number of classes
-    :param num_heads: Number of attention heads
-    :param embed_dim: Token dimension after projection, and before reshaping operation.
-    :param preds_per_patch: Increases size of feature map by reshaping each patch  Each patch gets reshaped
-        from embed_dim x 1 x 1 to (embed_dim / preds_per_patch) x (preds_per_patch ** 0.5) x (preds_per_patch ** 0.5)
-    :param main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
-    :param patch_size: Size of patches
-    :param depth: Number of ConvNeXt blocks
-    :interpolate_mode: Interpolation mode for final upsampling
+    Args:
+        num_classes: Number of classes
+        num_heads: Number of attention heads
+        embed_dim: Token dimension after projection, and before reshaping operation.
+        preds_per_patch: Increases size of feature map by reshaping each patch  Each patch gets reshaped
+            from embed_dim x 1 x 1 to (embed_dim / preds_per_patch) x (preds_per_patch ** 0.5) x (preds_per_patch ** 0.5)
+        main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
+        patch_size: Size of patches
+        depth: Number of ConvNeXt blocks
+        interpolate_mode: Interpolation mode for final upsampling
     """
 
     def __init__(
-            self,
-            num_classes,
-            embed_dim: int = 6144,
-            preds_per_patch: int = 16,
-            main_tasks: Union[tuple, list] = ('bscan',),
-            patch_size: list = [16, 16],
-            depth: int = 4,
-            interpolate_mode: str = 'bilinear',
-            task: Optional[str] = None,
-            image_size: Optional[Tuple[int, int]] = None,
-            **kwargs,
+        self,
+        num_classes,
+        embed_dim: int = 6144,
+        preds_per_patch: int = 16,
+        main_tasks: Union[tuple, list] = ('bscan',),
+        patch_size: list = [16, 16],
+        depth: int = 4,
+        interpolate_mode: str = 'bilinear',
+        task: Optional[str] = None,
+        image_size: Optional[Tuple[int, int]] = None,
+        **kwargs,
     ):
         super().__init__(main_tasks)
         self.patch_size = patch_size
@@ -476,7 +484,8 @@ class ConvNeXtAdapter(Adapter):
         Initialize parts of decoder that are dependent on dimension of encoder tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens_enc: Dimension of tokens coming from encoder
+        Args:
+            dim_tokens_enc: Dimension of tokens coming from encoder
         """
         self.in_channels = dim_tokens_enc * len(self.main_tasks)
 
@@ -511,10 +520,11 @@ class ConvNeXtAdapter(Adapter):
 class LinearSegAdapter(Adapter):
     """Output adapter with a single 1x1 conv layer for semantic segmentation
 
-    :param num_classes: Number of classes
-    :param main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
-    :param patch_size: Size of patches
-    :interpolate_mode: Interpolation mode for final upsampling
+    Args:
+        num_classes: Number of classes
+        main_tasks: Tasks to use for the adapter. Only tokens coming from these tasks are kept.
+        patch_size: Size of patches
+        interpolate_mode: Interpolation mode for final upsampling
     """
 
     def __init__(
@@ -541,7 +551,8 @@ class LinearSegAdapter(Adapter):
         Initialize parts of decoder that are dependent on dimension of encoder tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens_enc: Dimension of tokens coming from encoder
+        Args:
+            dim_tokens_enc: Dimension of tokens coming from encoder
         """
         self.final_layer = nn.Conv2d(dim_tokens_enc, self.num_classes, 1)
 
@@ -567,32 +578,35 @@ class LinearSegAdapter(Adapter):
 class DPTOutputAdapter(Adapter):
     """DPT output adapter.
 
-    :param num_classes: Number of output channels
-    :param stride_level: tride level compared to the full-sized image.
-        E.g. 4 for 1/4th the size of the image.
-    :param patch_size_full: Int or tuple of the patch size over the full image size.
-        Patch size for smaller inputs will be computed accordingly.
-    :param hooks: Index of intermediate layers
-    :param layer_dims: Dimension of intermediate layers
-    :param feature_dim: Feature dimension
-    :param use_bn: If set to True, activates batch norm
-    :param dim_tokens_enc:  Dimension of tokens coming from encoder
+    Args:
+        num_classes: Number of output channels
+        stride_level: tride level compared to the full-sized image.
+            E.g. 4 for 1/4th the size of the image.
+        patch_size_full: Int or tuple of the patch size over the full image size.
+            Patch size for smaller inputs will be computed accordingly.
+        hooks: Index of intermediate layers
+        layer_dims: Dimension of intermediate layers
+        feature_dim: Feature dimension
+        use_bn: If set to True, activates batch norm
+        dim_tokens_enc:  Dimension of tokens coming from encoder
     """
 
-    def __init__(self,
-                 num_classes: int = 3,
-                 stride_level: int = 1,
-                 patch_size: Union[tuple, list] = [16, 16],
-                 main_tasks: Union[tuple, list] = ('bscan',),
-                 hooks: List[int] = [2, 5, 8, 11],
-                 layer_dims: List[int] = [96, 192, 384, 768],
-                 feature_dim: int = 256,
-                 use_bn: bool = False,
-                 dim_tokens_enc: Optional[int] = None,
-                 head_type: str = 'semseg',
-                 task: str = 'semseg',
-                 image_size: Optional[Tuple[int, int]] = None,
-                 **kwargs):
+    def __init__(
+        self,
+        num_classes: int = 3,
+        stride_level: int = 1,
+        patch_size: Union[tuple, list] = [16, 16],
+        main_tasks: Union[tuple, list] = ('bscan',),
+        hooks: List[int] = [2, 5, 8, 11],
+        layer_dims: List[int] = [96, 192, 384, 768],
+        feature_dim: int = 256,
+        use_bn: bool = False,
+        dim_tokens_enc: Optional[int] = None,
+        head_type: str = 'semseg',
+        task: str = 'semseg',
+        image_size: Optional[Tuple[int, int]] = None,
+        **kwargs
+    ):
         super().__init__(main_tasks)
         self.num_channels = num_classes
         self.stride_level = stride_level
@@ -648,7 +662,8 @@ class DPTOutputAdapter(Adapter):
         Initialize parts of decoder that are dependent on dimension of encoder tokens.
         Should be called when setting up MIRAGE.
 
-        :param dim_tokens_enc: Dimension of tokens coming from encoder
+        Args:
+            dim_tokens_enc: Dimension of tokens coming from encoder
         """
         self.dim_tokens_enc = dim_tokens_enc * len(self.main_tasks)
 

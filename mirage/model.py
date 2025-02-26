@@ -8,10 +8,10 @@ import torch
 from torch import Tensor
 from torch import nn
 from torch.distributions.dirichlet import Dirichlet
-from torch.amp.autocast_mode import autocast
 from einops import repeat, rearrange
 
 from mirage.utils import Block, trunc_normal_
+from mutils.factory import get_factory_adder
 
 
 
@@ -22,19 +22,19 @@ class MIRAGEModel(nn.Module):
     and should be used instead for downstream tasks
 
 
-    :param input_adapters: Dictionary of task -> input adapters
-    :param output_adapters: Optional dictionary of task -> output adapters
-
-    :param num_global_tokens: Number of additional global tokens to add (like cls tokens), default is 1
-    :param dim_tokens: Dimension of encoder tokens
-    :param depth: Depth of encoder
-    :param num_heads: Number of attention heads
-    :param mlp_ratio: MLP hidden dim ratio
-    :param qkv_bias: Set to False to disable bias
-    :param drop_rate: Dropout after MLPs and Attention
-    :param attn_drop_rate: Attention matrix drop rate
-    :param drop_path_rate: DropPath drop rate
-    :param norm_layer: Type of normalization layer
+    Args:
+         input_adapters: Dictionary of task -> input adapters
+         output_adapters: Optional dictionary of task -> output adapters
+         num_global_tokens: Number of additional global tokens to add (like cls tokens), default is 1
+         dim_tokens: Dimension of encoder tokens
+         depth: Depth of encoder
+         num_heads: Number of attention heads
+         mlp_ratio: MLP hidden dim ratio
+         qkv_bias: Set to False to disable bias
+         drop_rate: Dropout after MLPs and Attention
+         attn_drop_rate: Attention matrix drop rate
+         drop_path_rate: DropPath drop rate
+         norm_layer: Type of normalization layer
     """
     def __init__(
         self,
@@ -99,8 +99,7 @@ class MIRAGEModel(nn.Module):
                     # treat the weights of K, V separately
                     val = math.sqrt(6. / float(m.weight.shape[0] // 2 + m.weight.shape[1]))
                     nn.init.uniform_(m.weight, -val, val)
-
-            if isinstance(m, nn.Conv2d):
+            elif isinstance(m, nn.Conv2d):
                 if '.proj' in name:
                     # From MAE, initialize projection like nn.Linear (instead of nn.Conv2d)
                     w = m.weight.data
@@ -139,15 +138,22 @@ class MIRAGEModel(nn.Module):
 
         return no_wd_set
 
-    def sample_alphas(self, B: int, n_tasks: int, alphas: Union[float, List[float], Tensor] = 1.0, eps: float = 1e-5):
-        """
-        Sample alphas for Dirichlet sampling such that tasks are first uniformly chosen and then Dirichlet sampling
-        is performed over the chosen ones.
+    def sample_alphas(
+        self,
+        B: int,
+        n_tasks: int,
+        alphas: Union[float, List[float], Tensor] = 1.0,
+        eps: float = 1e-5
+    ):
+        """Sample alphas for Dirichlet sampling such that tasks are
+        first uniformly chosen and then Dirichlet sampling is performed
+        over the chosen ones.
 
-        :param B: Batch size
-        :param n_tasks: Number of input tasks
-        :param alphas: Float or list to multiply task choices {0,1} by
-        :param eps: Small constant since Dirichlet alphas need to be positive
+        Args:
+            B: Batch size
+            n_tasks: Number of input tasks
+            alphas: Float or list to multiply task choices {0,1} by
+            eps: Small constant since Dirichlet alphas need to be positive
         """
         valid_task_choices = torch.Tensor([list(i) for i in itertools.product([0, 1], repeat=n_tasks)][1:])
         rand_per_sample_choice = torch.randint(0, len(valid_task_choices), (B,))
@@ -161,17 +167,17 @@ class MIRAGEModel(nn.Module):
         num_encoded_tokens: int,
         alphas: Union[float, List[float], Tensor] = 1.0,
         sample_tasks_uniformly: bool = False,
-        custom_sampling: bool = False
     ):
-        """
-        Sample a total of num_encoded_tokens from different tasks using Dirichlet sampling.
+        """Sample a total of num_encoded_tokens from different tasks
+        using Dirichlet sampling.
 
-        :param input_tokens: Dictionary of tensors to sample num_encoded_tokens from
-        :param num_encoded_tokens: Number of tokens to select
-        :param alphas: Dirichlet distribution parameter alpha. Lower alpha = harder,
-            less uniform sampling. Can be float or list of floats.
-        :param sample_tasks_uniformly: Set to True to first sample 1-n_tasks uniformly at random
-            for each sample in the batch. Dirichlet sampling is then done over selected subsets.
+        Args:
+            input_tokens: Dictionary of tensors to sample num_encoded_tokens from
+            num_encoded_tokens: Number of tokens to select
+            alphas: Dirichlet distribution parameter alpha. Lower alpha = harder,
+                less uniform sampling. Can be float or list of floats.
+            sample_tasks_uniformly: Set to True to first sample 1-n_tasks uniformly at random
+                for each sample in the batch. Dirichlet sampling is then done over selected subsets.
         """
         B = list(input_tokens.values())[0].shape[0]
         device = list(input_tokens.values())[0].device
@@ -188,27 +194,13 @@ class MIRAGEModel(nn.Module):
             # Order the dictionary by value
             self.token_dist = dict(sorted(self.token_dist.items(), key=lambda item: item[1], reverse=True))
             print('> Token distribution:', self.token_dist)
-            if custom_sampling:
-                print('> Custom sampling enabled')
 
-        if custom_sampling:
-            # Scale task_sampling_dist acording to the number of tokens
-            #  per task
-            # Normal distribution for task with more tokens, rest uniform
-            task_sampling_dist = torch.zeros(B, len(input_tokens)).to(device)
-            for i, domain in enumerate(input_tokens.keys()):
-                # Normal distribution centered at token_dist[domain]
-                task_sampling_dist[:, i] = torch.clip(
-                    torch.normal(mean=self.token_dist[domain], std=0.1, size=(B,)),
-                    min=0, max=1)
-            task_sampling_dist = task_sampling_dist / task_sampling_dist.sum(dim=1, keepdim=True)
+        alphas = [alphas] * len(input_tokens) if isinstance(alphas, float) else alphas
+        if sample_tasks_uniformly:
+            alphas = self.sample_alphas(B, len(input_tokens), alphas=alphas)
+            task_sampling_dist = Dirichlet(alphas).sample().to(device)
         else:
-            alphas = [alphas] * len(input_tokens) if isinstance(alphas, float) else alphas
-            if sample_tasks_uniformly:
-                alphas = self.sample_alphas(B, len(input_tokens), alphas=alphas)
-                task_sampling_dist = Dirichlet(alphas).sample().to(device)
-            else:
-                task_sampling_dist = Dirichlet(torch.Tensor(alphas)).sample((B,)).to(device)
+            task_sampling_dist = Dirichlet(torch.Tensor(alphas)).sample((B,)).to(device)
 
         samples_per_task = (task_sampling_dist * num_encoded_tokens).round().long()
 
@@ -243,9 +235,17 @@ class MIRAGEModel(nn.Module):
         return task_masks, ids_keep, ids_restore
 
     @staticmethod
-    def make_mask(N_H, N_W, xy_idxs, full_tasks=[], indicate_visible=True, flatten=True, device='cuda'):
-        """
-        Creates masks for each task, given lists of un-masked x,y coordinates.
+    def make_mask(
+        N_H,
+        N_W,
+        xy_idxs,
+        full_tasks=[],
+        indicate_visible=True,
+        flatten=True,
+        device='cuda'
+    ):
+        """Creates masks for each task, given lists of un-masked x,y
+        coordinates.
         """
         xy_idxs = {
             k: torch.LongTensor(v)
@@ -280,7 +280,7 @@ class MIRAGEModel(nn.Module):
             num_tokens = tensor.shape[1]
             d = {
                 'num_tokens': num_tokens,
-                'has_posemb': True,  # TODO: Modify when adding non-2D tasks
+                'has_posemb': True,
                 'start_idx': i,
                 'end_idx': i + num_tokens,
             }
@@ -298,32 +298,32 @@ class MIRAGEModel(nn.Module):
 
         return input_info
 
-    def forward(self,
-                x: Union[Dict[str, torch.Tensor], torch.Tensor],
-                mask_inputs: bool = True,
-                task_masks: Optional[Dict[str, torch.Tensor]] = None,
-                num_encoded_tokens: int = 128,
-                alphas: Union[float, List[float]] = 1.0,
-                sample_tasks_uniformly: bool = False,
-                fp32_output_adapters: List[str] = [],
-                return_all_layers: bool = False,
-                reshape: bool = False,
-                ):
+    def forward(
+        self,
+        x: Union[Dict[str, torch.Tensor], torch.Tensor],
+        mask_inputs: bool = True,
+        task_masks: Optional[Dict[str, torch.Tensor]] = None,
+        num_encoded_tokens: int = 128,
+        alphas: Union[float, List[float]] = 1.0,
+        sample_tasks_uniformly: bool = False,
+        return_all_layers: bool = False,
+        reshape: bool = False,
+    ):
         """
         Forward pass through input adapters, transformer encoder and output adapters.
         If specified, will randomly drop input tokens.
 
-        :param x: Input tensor or dictionary of tensors
-        :param mask_inputs: Set to True to enable random masking of input patches
-        :param task_masks: Optional dictionary of task->mask pairs.
-        :param num_encoded_tokens: Number of tokens to randomly select for encoder.
-            Only used if mask_inputs is True.
-        :param alphas: Dirichlet distribution parameter alpha for task sampling.
-            Higher alpha = harder, less uniform sampling. Can be float or list of floats.
-        :param sample_tasks_uniformly: Set to True if tasks should be uniformly presampled,
-            before Dirichlet sampling decides share of masked tokens between them.
-        :param fp32_output_adapters: List of task identifiers to force output adapters to
-            run with mixed precision turned off for stability reasons.
+        Args:
+            x: Input tensor or dictionary of tensors
+            mask_inputs: Set to True to enable random masking of input patches
+            task_masks: Optional dictionary of task->mask pairs.
+            num_encoded_tokens: Number of tokens to randomly select for encoder.
+                Only used if mask_inputs is True.
+            alphas: Dirichlet distribution parameter alpha for task sampling.
+                Higher alpha = harder, less uniform sampling. Can be float or list of floats.
+            sample_tasks_uniformly: Set to True if tasks should be uniformly presampled,
+                before Dirichlet sampling decides share of masked tokens between them.
+            return_all_layers: Set to True to return the features of all transformer layers,
         """
 
         ## Processing input modalities
@@ -370,7 +370,6 @@ class MIRAGEModel(nn.Module):
                 num_encoded_tokens,
                 alphas=alphas,
                 sample_tasks_uniformly=sample_tasks_uniformly,
-                custom_sampling=self.args.custom_sampling
             )
         else:
             mask_all = torch.cat([task_masks[task] for task in input_task_tokens.keys()], dim=1)
@@ -423,18 +422,143 @@ class MIRAGEModel(nn.Module):
                 ids_restore=ids_restore,
             )
             for domain in self.output_adapters
-            if domain not in fp32_output_adapters
         }
-        # Force running selected output adapters in fp32 mode
-        with autocast('cuda', enabled=False):
-            for domain in fp32_output_adapters:
-                if domain not in self.output_adapters:
-                    continue
-                preds[domain] = self.output_adapters[domain](
-                    encoder_tokens=encoder_tokens.float(),
-                    input_info=input_info,
-                    ids_keep=ids_keep,
-                    ids_restore=ids_restore,
-                )
 
         return preds, task_masks
+
+
+class MIRAGELight(MIRAGEModel):
+    """MultiViT: Multi-modal Vision Transformer
+    This is MIRAGE without masking and with a simplified / faster forward pass
+
+    Args:
+        input_adapters: Dictionary of task -> input adapters
+        output_adapters: Optional dictionary of task -> output adapters
+        num_global_tokens: Number of additional global tokens to add (like cls tokens), default is 1
+        dim_tokens: Dimension of encoder tokens
+        depth: Depth of encoder
+        num_heads: Number of attention heads
+        mlp_ratio: MLP hidden dim ratio
+        qkv_bias: Set to False to disable bias
+        drop_rate: Dropout after MLPs and Attention
+        attn_drop_rate: Attention matrix drop rate
+        drop_path_rate: DropPath drop rate
+        norm_layer: Type of normalization layer
+    """
+
+    def process_input(self, x):
+
+        # If input x is a Tensor, assume it's RGB
+        x = {'bscan': x} if isinstance(x, torch.Tensor) else x
+        # Need image size for tokens->image reconstruction
+        if 'bscan' in x:
+            B, _, H, W = x['bscan'].shape
+        elif 'semseg' in x:
+            B, H, W = x['semseg'].shape
+            H *= self.input_adapters['semseg'].stride_level
+            W *= self.input_adapters['semseg'].stride_level
+        else:
+            B, _, H, W = list(x.values())[0].shape  # TODO: Deal with case where not all have same shape
+
+        # Encode selected inputs to tokens
+        input_task_tokens = {
+            domain: self.input_adapters[domain](tensor)
+            for domain, tensor in x.items()
+            if domain in self.input_adapters
+        }
+
+        input_info = self.generate_input_info(input_task_tokens=input_task_tokens, image_size=(H, W))
+        input_tokens = torch.cat([task_tokens for task_tokens in input_task_tokens.values()], dim=1)
+
+        # Add global tokens to input tokens
+        global_tokens = repeat(self.global_tokens, '() n d -> b n d', b=B)
+        input_tokens = torch.cat([input_tokens, global_tokens], dim=1)
+
+        return input_tokens, input_info
+
+    def forward(  # type: ignore
+        self,
+        x: Union[Dict[str, torch.Tensor], torch.Tensor],
+        return_all_layers=False,
+        **kwargs
+    ):
+        """Forward pass through input adapters, transformer encoder and
+        output adapters.
+
+        Args:
+            x: Input tensor or dictionary of tensors
+            return_all_layers: Set to True to return all transformer layers
+        """
+
+        input_tokens, input_info = self.process_input(x)
+
+        # Pass tokens through Transformer
+        if not return_all_layers:
+            encoder_tokens = self.encoder(input_tokens)
+        else:
+            # Optionally access every intermediate layer
+            encoder_tokens = []
+            tokens = input_tokens
+            for block in self.encoder:
+                tokens = block(tokens)
+                encoder_tokens.append(tokens)
+
+        if self.output_adapters is None:
+            return encoder_tokens
+
+        # Decode tokens for each task using task-specific output adapters
+        preds = {
+            domain: self.output_adapters[domain](
+                encoder_tokens=encoder_tokens,
+                input_info=input_info,
+            )
+            for domain in self.output_adapters
+        }
+
+        return preds
+
+
+
+add_model, model_factory = get_factory_adder()
+
+
+@add_model
+def miragelight_base(
+    input_adapters: Dict[str, nn.Module],
+    output_adapters: Optional[Dict[str, nn.Module]],
+    args,
+    **kwargs
+):
+    return MIRAGELight(
+        args,
+        input_adapters=input_adapters,
+        output_adapters=output_adapters,
+        dim_tokens=768,
+        depth=12,
+        num_heads=12,
+        mlp_ratio=4,
+        qkv_bias=True,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs
+    )
+
+
+@add_model
+def miragelight_large(
+    input_adapters: Dict[str, nn.Module],
+    output_adapters: Optional[Dict[str, nn.Module]],
+    args,
+    **kwargs
+):
+    return MIRAGELight(
+        args,
+        input_adapters=input_adapters,
+        output_adapters=output_adapters,
+        dim_tokens=1024,
+        depth=24,
+        num_heads=16,
+        mlp_ratio=4,
+        qkv_bias=True,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs
+    )

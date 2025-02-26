@@ -13,7 +13,7 @@ class ConvNeXtBlock(nn.Module):
 
     Args:
         dim (int): Number of input channels.
-        drop_path: Stochastic depth rate. Default: 0.0
+        drop_path (float): Stochastic depth rate. Default: 0.0
         layer_scale_init_value (float): Init value for Layer Scale. Default: 0 (disabled for isotropic ConvNeXt).
 
     Code from: https://github.com/facebookresearch/ConvNeXt/blob/main/models/convnext.py
@@ -50,7 +50,7 @@ class ResidualConvUnit_custom(nn.Module):
     """Residual convolution module."""
 
     def __init__(self, features, activation, bn):
-        """Init.
+        """
         Args:
             features (int): number of features
         """
@@ -89,13 +89,6 @@ class ResidualConvUnit_custom(nn.Module):
         self.skip_add = torch.ao.nn.quantized.FloatFunctional()
 
     def forward(self, x):
-        """Forward pass.
-        Args:
-            x (tensor): input
-        Returns:
-            tensor: output
-        """
-
         out = self.activation(x)
         out = self.conv1(out)
         if self.bn == True:
@@ -214,10 +207,6 @@ class FeatureFusionBlock_custom(nn.Module):
         self.skip_add = torch.ao.nn.quantized.FloatFunctional()
 
     def forward(self, *xs):
-        """Forward pass.
-        Returns:
-            tensor: output
-        """
         output = xs[0]
 
         if len(xs) == 2:
@@ -249,7 +238,7 @@ class Interpolate(nn.Module):
     """Interpolation module."""
 
     def __init__(self, scale_factor, mode, align_corners=False):
-        """Init.
+        """
         Args:
             scale_factor (float): scaling
             mode (str): interpolation mode
@@ -262,18 +251,9 @@ class Interpolate(nn.Module):
         self.align_corners = align_corners
 
     def forward(self, x):
-        """Forward pass.
-        Args:
-            x (tensor): input
-        Returns:
-            tensor: interpolated data
-        """
-
-        x = self.interp(
+        return self.interp(
             x,
             scale_factor=self.scale_factor,
             mode=self.mode,
             align_corners=self.align_corners,
         )
-
-        return x

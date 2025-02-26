@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+
+import sys
+import json
+import multiprocessing as mp
+import os
+from itertools import product
+
+
+
+args_list = list()
+
+base_command = None
+record_args = False
+skip = 0
+num_runners = 1
+runner_info = False
+incompatible = []
+for arg in sys.argv[1:]:
+    if skip > 0:
+        skip -= 1
+        continue
+    if base_command is None:
+        base_command = arg
+    elif arg.startswith("--"):
+        if arg == "--runners":
+            num_runners = int(sys.argv[sys.argv.index(arg) + 1])
+            skip = 1
+            continue
+        if arg == "--runner-info":
+            runner_info = True
+            continue
+        if arg == "--runner-filter":
+            skip = 0
+            for value in sys.argv[sys.argv.index(arg) + 1:]:
+                if value.startswith("--"):
+                    break
+                else:
+                    print(value.split(","))
+                    incompatible.append(value.split(","))
+                    skip += 1
+            continue
+        elif arg == "--":
+            record_args = True
+            continue
+    else:
+        base_command += f" {arg}"
+
+    if arg.startswith("--"):
+        values = []
+        for value in sys.argv[sys.argv.index(arg) + 1:]:
+            if value.startswith("--"):
+                break
+            values.append((arg, value))
+            skip += 1
+        if len(values) > 0:
+            args_list.append(values)
+        else:
+            args_list.append([(arg, None)])
+
+
+print(base_command)
+print(json.dumps(args_list, indent=4))
+
+# Compute the dot product of the values
+num_commands = 1
+for values in args_list:
+    num_commands = num_commands * len(values)
+
+# print(f"Number of commands: {num_commands}")
+
+
+all_combs = list(product(*args_list))
+print(f"Number of combinations: {len(all_combs)}")
+
+assert isinstance(base_command, str)
+commands = []
+for comb in all_combs:
+    command = base_command
+    for arg, value in comb:
+        if value is not None:
+            command += f" {arg} {value}"
+        else:
+            command += f" {arg}"
+    any_present = False
+    for inc_group in incompatible:
+        all_present = True
+        for inc in inc_group:
+            if inc not in command:
+                all_present = False
+                break
+        if all_present:
+            any_present = True
+            break
+    if not any_present:
+        commands.append(command)
+
+# print(json.dumps(commands, indent=4))
+
+print(f"Number of commands: {len(commands)}")
+print(f"Number of runners: {num_runners}")
+
+
+def run_command(command):
+    print("=" * 80)
+    print(command)
+    print("-" * 80)
+    if not runner_info:
+        os.system(command)
+
+
+with mp.Pool(num_runners) as pool:
+    pool.map(run_command, commands)

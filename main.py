@@ -153,9 +153,10 @@ class MIRAGEWrapper(nn.Module):
     def forward(self, x: dict):
         """
         Args:
-            x: (B, C, H, W) tensor. H and W are determined by the
+            Dict[x, (B, C, H, W) tensor]. H and W are determined by the
             input_size parameter in the constructor. It expects a tensor
             in the range [0, 1].
+
         Returns:
             (B, C, H, W) tensor
         """

@@ -71,6 +71,17 @@ We provide all the publicly available datasets used in the benchmark with the da
 See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/classification_benchmark.md](docs/classification_benchmark.md) for more details on the classification and segmentation benchmarks, respectively.
 
 
+## Segmentation tuning
+
+We provide the code to fine-tune MIRAGE and other state-of-the-art foundation models for OCT segmentation tasks.
+Please check the [docs/segmentation_tuning.md](docs/segmentation_tuning.md) for more details.
+
+
+## Questions and issues
+
+If you have any questions or find problems with the code, please open an issue on GitHub.
+
+
 ## Citation
 
 If you find this repository useful, please consider giving it a star ⭐ and a citation 📝:
@@ -101,7 +112,7 @@ This project is under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for detai
 
 ## Acknowledgements
 
-MIRAGE code is mainly based on MultiMAE, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, and mmsegmentation.
+MIRAGE code is mainly based on MultiMAE, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, mmsegmentation, and MONAI.
 We thank the authors for making their code available.
 
 * <https://github.com/EPFL-VILAB/MultiMAE>
@@ -113,3 +124,4 @@ We thank the authors for making their code available.
 * <https://github.com/BUPT-PRIV/MAE-priv>
 * <https://github.com/facebookresearch/mae>
 * <https://github.com/open-mmlab/mmsegmentation>
+* <https://github.com/Project-MONAI/MONAI>
