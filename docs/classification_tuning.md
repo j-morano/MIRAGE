@@ -43,6 +43,7 @@ You can specify a different output directory using the `--base_output_dir` argum
 
 > [!IMPORTANT]
 > The script uses the filename of the weights to determine which model configuration to use. In particular, the filename should contain the model name, so that the following substrings load the corresponding model configuration (case-insensitive):
+>
 > - `mirage-base`: MIRAGE-Base
 > - `mirage-large`: MIRAGE-Large
 > - `dinov2-base`: DINOv2-Base
@@ -50,10 +51,13 @@ You can specify a different output directory using the `--base_output_dir` argum
 > - `retfound`: RETFound
 > - `imagenet21k-base`: ViT-Base pretrained on ImageNet21k
 > - `imagenet21k-large`: ViT-Large pretrained on ImageNet21k
+>
 > DINOv2 models are automatically loaded from `torch.hub`, so using `--weights dinov2-[base,large]` is enough.
 > For RETFound weights, please check the corresponding repository (<https://github.com/rmaphoh/RETFound_MAE>), and for ImageNet21k, the following Hugging Face links:
+>
 > - <https://huggingface.co/timm/vit_base_patch16_224.orig_in21k>
 > - <https://huggingface.co/timm/vit_large_patch16_224.orig_in21k>
+>
 > Remember to rename the weights file to include the model name, when necessary.
 
 

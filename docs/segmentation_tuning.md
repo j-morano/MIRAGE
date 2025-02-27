@@ -43,11 +43,13 @@ You can specify a different output directory using the `--base_output_dir` argum
 
 > [!IMPORTANT]
 > The script uses the filename of the weights to determine which model configuration to use. In particular, the filename should contain the model name, so that the following substrings load the corresponding model configuration (case-insensitive):
+>
 > - `mirage-base`: MIRAGE-Base
 > - `mirage-large`: MIRAGE-Large
 > - `dinov2`: DINOv2
 > - `retfound`: RETFound
 > - `medsam`: MedSAM
+>
 > DINOv2 is automatically loaded from `torch.hub`, so using `--weights dinov2` is enough to load the model.
 > For RETFound and MedSAM weights, please check the corresponding repositories ([RETFound](https://github.com/rmaphoh/RETFound_MAE), [MedSAM](https://github.com/bowang-lab/MedSAM)).
 
