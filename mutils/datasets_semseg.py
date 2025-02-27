@@ -6,10 +6,7 @@ import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from mutils.data_constants import (
-    IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD,
-    VISIONFM_DEFAULT_MEAN, VISIONFM_DEFAULT_STD,
-)
+from mutils.data_constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from mutils.dataset_folder import MultiTaskImageFolder
 
 
@@ -58,12 +55,6 @@ def simple_transform(
         norm_list += [
             ToRGB(p=1),
             A.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),
-        ]
-    elif norm == 'visionfm':
-        print("Using visionfm normalization")
-        norm_list += [
-            ToRGB(p=1),
-            A.Normalize(mean=VISIONFM_DEFAULT_MEAN, std=VISIONFM_DEFAULT_STD),
         ]
     elif norm == 'sam':
         print("Using SAM normalization")

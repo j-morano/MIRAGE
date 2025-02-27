@@ -2,6 +2,7 @@ from functools import partial
 from pathlib import Path
 import copy
 import argparse
+from typing import Union
 
 import numpy as np
 import torch
@@ -13,6 +14,7 @@ from torchvision.utils import save_image
 from mirage.input_adapters import PatchedInputAdapter, SemSegInputAdapter
 from mirage.output_adapters import SpatialOutputAdapter
 from mirage.model import MIRAGEModel
+from mirage.utils import pair
 
 
 
@@ -41,76 +43,15 @@ DOMAIN_CONF = {
 }
 
 
-def get_model(args):
-    """Creates and returns model from arguments."""
-    print(
-        f"Creating model: {args.model} for inputs {args.in_domains}"
-        f" and outputs {args.out_domains}"
-    )
-    all_domains = set(args.in_domains + args.out_domains)
-    if isinstance(args.patch_size, int):
-        args.patch_size = {
-            domain: (args.patch_size, args.patch_size)
-            for domain in all_domains
-        }
-
-    input_adapters = {
-        domain: DOMAIN_CONF[domain]['input_adapter'](
-            stride_level=DOMAIN_CONF[domain]['stride_level'],
-            patch_size_full=tuple(args.patch_size[domain]),
-            image_size=args.input_size[domain],
-        )
-        for domain in args.in_domains
-    }
-
-    output_adapters = {
-        domain: DOMAIN_CONF[domain]['output_adapter'](
-            stride_level=DOMAIN_CONF[domain]['stride_level'],
-            patch_size_full=tuple(args.patch_size[domain]),
-            dim_tokens=args.decoder_dim,
-            depth=args.decoder_depth,
-            num_heads=args.decoder_num_heads,
-            use_task_queries=args.decoder_use_task_queries,
-            task=domain,
-            context_tasks=list(args.in_domains),
-            use_xattn=args.decoder_use_xattn,
-            image_size=args.input_size[domain],
-        )
-        for domain in args.out_domains
-    }
-
-    if 'large' in args.model:
-        model = MIRAGEModel(
-            args=args,
-            input_adapters=input_adapters,
-            output_adapters=output_adapters,
-            num_global_tokens=args.num_global_tokens,
-            drop_path_rate=args.drop_path,
-            dim_tokens=1024,
-            depth=24,
-            num_heads=16,
-        )
-    else:
-        model = MIRAGEModel(
-            args=args,
-            input_adapters=input_adapters,
-            output_adapters=output_adapters,
-            num_global_tokens=args.num_global_tokens,
-            drop_path_rate=args.drop_path,
-        )
-
-    return model
-
-
 class MIRAGEWrapper(nn.Module):
     def __init__(
         self,
         input_size=512,
         patch_size=32,
-        all_tokens=False,
-        modalities="bscan",
+        modalities='bscan-slo-bscanlayermap',
         weights=None,
-        device="cuda",
+        device='cuda',
+        num_classes=0,
     ):
         super().__init__()
 
@@ -118,37 +59,105 @@ class MIRAGEWrapper(nn.Module):
         state_dict = torch.load(weights, map_location=device, weights_only=False)
         model_state_dict = state_dict["model"]
 
-        self.args = state_dict["args"]
+        args = state_dict["args"]
 
-        modalities = self.args.in_domains
-        self.args.in_domains = modalities
-        self.args.input_size = {}
-        if isinstance(input_size, int):
-            input_size = (input_size, input_size)
-        if isinstance(patch_size, int):
-            patch_size = (patch_size, patch_size)
-        for domain in modalities:
+        args.in_domains = modalities.split('-')
+        input_size = pair(input_size)
+        patch_size = pair(patch_size)
+        assert input_size is not None
+        assert patch_size is not None
+        args.patch_size = {}
+        args.input_size = {}
+        args.grid_size = {}
+        for domain in args.in_domains:
             if domain != "bscanlayermap":
-                self.args.input_size[domain] = input_size
+                args.patch_size[domain] = patch_size
+                args.input_size[domain] = input_size
             else:
-                self.args.input_size[domain] = (128, 128)
-        self.args.patch_size = {}
-        for domain in modalities:
-            if domain != "bscanlayermap":
-                self.args.patch_size[domain] = patch_size
-            else:
-                self.args.patch_size[domain] = (8, 8)
-        self.args.grid_size = {}
-        for domain in modalities:
-            self.args.grid_size[domain] = []
+                args.patch_size[domain] = (8, 8)
+                args.input_size[domain] = (128, 128)
+            args.grid_size[domain] = []
             for i in range(len(input_size)):
-                self.args.grid_size[domain].append(input_size[i] // patch_size[i])
+                args.grid_size[domain].append(input_size[i] // patch_size[i])
 
-        self.model = get_model(self.args)
-        self.all_tokens = all_tokens
-        print('>> Loading weights from:', weights)
-        self.model.load_state_dict(model_state_dict, strict=True)
-        self.model.to(device)
+        self.args = args
+        self.model = self.get_model()
+        self.num_classes = num_classes
+        self.load_model(model_state_dict)
+
+    def get_output_adapters(self) -> Union[None, dict]:
+        return {
+            domain: DOMAIN_CONF[domain]['output_adapter'](
+                stride_level=DOMAIN_CONF[domain]['stride_level'],
+                patch_size_full=tuple(self.args.patch_size[domain]),
+                dim_tokens=self.args.decoder_dim,
+                depth=self.args.decoder_depth,
+                num_heads=self.args.decoder_num_heads,
+                use_task_queries=self.args.decoder_use_task_queries,
+                task=domain,
+                context_tasks=list(self.args.in_domains),
+                use_xattn=self.args.decoder_use_xattn,
+                image_size=self.args.input_size[domain],
+            )
+            for domain in self.args.out_domains
+        }
+
+    def get_model(self):
+        """Creates and returns model from arguments."""
+        print(
+            f"Creating model: {self.args.model} for inputs {self.args.in_domains}"
+            f" and outputs {self.args.out_domains}"
+        )
+
+        input_adapters = {
+            domain: DOMAIN_CONF[domain]['input_adapter'](
+                stride_level=DOMAIN_CONF[domain]['stride_level'],
+                patch_size_full=tuple(self.args.patch_size[domain]),
+                image_size=self.args.input_size[domain],
+            )
+            for domain in self.args.in_domains
+        }
+
+        output_adapters = self.get_output_adapters()
+
+        if 'large' in self.args.model:
+            model = MIRAGEModel(
+                args=self.args,
+                input_adapters=input_adapters,
+                output_adapters=output_adapters,
+                num_global_tokens=self.args.num_global_tokens,
+                drop_path_rate=self.args.drop_path,
+                dim_tokens=1024,
+                depth=24,
+                num_heads=16,
+            )
+        elif 'base' in self.args.model:
+            model = MIRAGEModel(
+                args=self.args,
+                input_adapters=input_adapters,
+                output_adapters=output_adapters,
+                num_global_tokens=self.args.num_global_tokens,
+                drop_path_rate=self.args.drop_path,
+            )
+        else:
+            raise ValueError('Unknown model size:', self.args.model)
+
+        return model
+
+    def load_model(self, model_state_dict):
+        if self.num_classes > 0:
+            self.model.output_adapters = None
+            if 'large' in self.args.model:
+                embed_dim = 1024
+            else:
+                embed_dim = 768
+            self.norm = nn.LayerNorm(embed_dim, eps=1e-06, elementwise_affine=True)
+            self.head = nn.Linear(embed_dim, self.num_classes)
+            self.model.load_state_dict(model_state_dict, strict=False)
+            print('>> Loaded weights for classification with', self.num_classes, 'classes.')
+        else:
+            print('>> Loaded weights.')
+            self.model.load_state_dict(model_state_dict, strict=True)
 
     def forward(self, x: dict):
         """
@@ -184,6 +193,31 @@ class MIRAGEWrapper(nn.Module):
     @property
     def device(self):
         return next(self.parameters()).device
+
+
+class MIRAGECls(MIRAGEWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert self.num_classes > 0
+        assert len(self.args.in_domains) == 1
+
+    def forward(self, x):
+        """
+        Args:
+            x: (B, C, H, W) tensor. H and W are determined by the
+            input_size parameter in the constructor. It expects a tensor
+            in the range [0, 1].
+        Returns:
+            (B, C, H, W) tensor
+        """
+        x_d = {self.args.in_domains[0]: x}
+        out, _masks = self.model(x_d, mask_inputs=False)
+        out = self.norm(out)
+        out = out[:, :-self.args.num_global_tokens, :].mean(dim=1)
+        return self.head(out)
+
+    def get_output_adapters(self):
+        return None
 
 
 def to_tensor(fn):

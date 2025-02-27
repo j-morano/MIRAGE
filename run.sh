@@ -1,35 +1,31 @@
 
 # Classification
-
-python3 run_cls_tuning.py \
+./runner python run_cls_tuning.py \
+    --runners 1 \
+    -- \
+    --version v1 \
     --seed 0 \
-    --model \
-        RETFound \
+    --weights \
+        ./__weights/MIRAGE-Base.pth \
+        ./__weights/MIRAGE-Large.pth \
     --linear_probing \
-    --early_stopping_epochs 20 \
-    --early_start_from 20 \
-    --val_metric bacc \
-    --early_stopping_delta 0.001 \
-    --val_metric_two loss \
-    --early_stopping_delta_two 0.001 \
-    --version VLM_bacc-loss_20-20 \
-    --num_workers 8 \
-    --pool token_mix \
+    --data_root \
+        ~/tmp/MIRAGE_DATASETS/Classification \
     --data_set \
-        GAMMAv2
+        GAMMA
 exit
 
 
-
 # Segmentation
-
-./runner python3 run_seg_tuning.py \
+./runner python run_seg_tuning.py \
     --runners 1 \
     -- \
+    --version v1 \
     --config \
         ./_cfgs/ft_semseg_200e_convnext.yaml \
-    --finetune \
-        './__weights/MIRAGE-Base.pth' \
-    --data_path '/home/morano/tmp/MIRAGE_DATASETS/Segmentation/Duke_DME/' \
-    --version v1
+    --weights \
+        ./__weights/MIRAGE-Base.pth \
+        ./__weights/MIRAGE-Large.pth \
+    --data_path \
+        ~/tmp/MIRAGE_DATASETS/Segmentation/Duke_DME/
 exit

@@ -44,11 +44,11 @@ tabulate==0.9.0
 termcolor==2.5.0
 tifffile==2024.9.20
 timm==0.4.12
----extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu118
 torch==2.5.1+cu118
----extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu118
 torchaudio==2.5.1+cu118
----extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu118
 torchvision==0.20.1+cu118
 torchinfo==1.8.0
 tqdm==4.67.1

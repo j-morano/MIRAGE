@@ -21,16 +21,17 @@ We also provide the utility script `runner` to run multiple experiments easily b
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
 
 ```bash
-./runner python3 run_seg_tuning.py \
+./runner python run_seg_tuning.py \
     --runners 1 \
     -- \
+    --version v1 \
     --config \
         ./_cfgs/ft_semseg_200e_convnext.yaml \
-    --finetune \
-        './__weights/MIRAGE-Base.pth' \
-        './__weights/MIRAGE-Large.pth' \
-    --data_path '_Data/Segmentation/Duke_DME/' \
-    --version v1
+    --weights \
+        ./__weights/MIRAGE-Base.pth \
+        ./__weights/MIRAGE-Large.pth \
+    --data_path \
+        ~/tmp/MIRAGE_DATASETS/Segmentation/Duke_DME/
 ```
 
 You can run `python run_seg_tuning.py --help` to see the available arguments and their descriptions.
@@ -47,17 +48,16 @@ You can specify a different output directory using the `--base_output_dir` argum
 > - `dinov2`: DINOv2
 > - `retfound`: RETFound
 > - `medsam`: MedSAM
+> DINOv2 is automatically loaded from `torch.hub`, so using `--weights dinov2` is enough to load the model.
+> For RETFound and MedSAM weights, please check the corresponding repositories ([RETFound](https://github.com/rmaphoh/RETFound_MAE), [MedSAM](https://github.com/bowang-lab/MedSAM)).
 
 
-## Extending the code
-
-
-### Adding a new dataset
+## Adding a new dataset
 
 To add a new dataset, you need to respect the dataset structure indicated in [docs/segmentation_benchmark.md](../docs/segmentation_benchmark.md).
 
 
-### Adding a new model
+## Adding a new model
 
 To add a new model, you need to create a new model class in `fm_seg_config.py` extending the `FoundModel` class in the same file.
 Your model has to be compatible with the input (patchifier+projector) and output adapters (decoders) used in our codebase.

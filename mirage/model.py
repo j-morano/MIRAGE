@@ -458,7 +458,8 @@ class MIRAGELight(MIRAGEModel):
             H *= self.input_adapters['semseg'].stride_level
             W *= self.input_adapters['semseg'].stride_level
         else:
-            B, _, H, W = list(x.values())[0].shape  # TODO: Deal with case where not all have same shape
+            # TODO: Deal with case where not all have same shape
+            B, _, H, W = list(x.values())[0].shape
 
         # Encode selected inputs to tokens
         input_task_tokens = {

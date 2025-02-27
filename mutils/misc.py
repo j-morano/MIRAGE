@@ -1,9 +1,17 @@
+from argparse import HelpFormatter
+from operator import attrgetter
 import random
 
 import torch
 import numpy as np
 from torch.backends import cudnn
 
+
+
+class SortingHelpFormatter(HelpFormatter):
+    def add_arguments(self, actions):
+        actions = sorted(actions, key=attrgetter('option_strings'))
+        super(SortingHelpFormatter, self).add_arguments(actions)
 
 
 def fix_seeds(seed):

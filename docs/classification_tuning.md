@@ -1,0 +1,70 @@
+# Classification tuning
+
+This repository provides the code to tune MIRAGE and other state-of-the-art foundation models for OCT and SLO classification tasks.
+
+
+## Requirements
+
+See [README#Requirements](../README.md#requirements) for the requirements.
+
+
+## Data
+
+The OCT segmentation datasets are available in [docs/classification_benchmark.md](../docs/classification_benchmark.md).
+
+
+## Usage
+
+The script `run_cls_tuning.py` provides the main entry point to tune the models. It supports several command-line arguments to configure the training process.
+
+We also provide the utility script `runner` to run multiple experiments easily by specifying multiple entries for the same argument.
+Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
+
+```bash
+./runner python run_cls_tuning.py \
+    --runners 1 \
+    -- \
+    --version v1 \
+    --seed 0 \
+    --weights \
+        ./__weights/MIRAGE-Base.pth \
+        ./__weights/MIRAGE-Large.pth \
+    --linear_probing \
+    --data_root \
+        ~/tmp/MIRAGE_DATASETS/Classification \
+    --data_set \
+        GAMMA
+```
+
+You can run `python run_cls_tuning.py --help` to see the available arguments and their descriptions.
+
+By default, the script will save the model weights and the training logs in the `./__output_cls` directory.
+You can specify a different output directory using the `--base_output_dir` argument.
+
+> [!IMPORTANT]
+> The script uses the filename of the weights to determine which model configuration to use. In particular, the filename should contain the model name, so that the following substrings load the corresponding model configuration (case-insensitive):
+> - `mirage-base`: MIRAGE-Base
+> - `mirage-large`: MIRAGE-Large
+> - `dinov2-base`: DINOv2-Base
+> - `dinov2-large`: DINOv2-Large
+> - `retfound`: RETFound
+> - `imagenet21k-base`: ViT-Base pretrained on ImageNet21k
+> - `imagenet21k-large`: ViT-Large pretrained on ImageNet21k
+> DINOv2 models are automatically loaded from `torch.hub`, so using `--weights dinov2-[base,large]` is enough.
+> For RETFound weights, please check the corresponding repository (<https://github.com/rmaphoh/RETFound_MAE>), and for ImageNet21k, the following Hugging Face links:
+> - <https://huggingface.co/timm/vit_base_patch16_224.orig_in21k>
+> - <https://huggingface.co/timm/vit_large_patch16_224.orig_in21k>
+> Remember to rename the weights file to include the model name, when necessary.
+
+
+
+## Adding a new dataset
+
+To add a new dataset, you need to respect the dataset structure indicated in [docs/classification_benchmark.md](../docs/classification_benchmark.md).
+
+
+## Adding a new model
+
+To add a new model, you need to create a new model class in `fm_cls_config.py` extending the `FoundModel` class in the same file.
+You can check the existing adapted models in the file for reference.
+

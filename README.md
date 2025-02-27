@@ -38,6 +38,14 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 <!-- - [ ] Pretraining code -->
 
 
+## Quick start
+
+For a quick start, use the provided script [prepare_env.sh](prepare_env.sh) to create a new python environment, install the required packages, and download the model weights and the datasets.
+
+```bash
+./prepare_env.sh
+```
+
 
 ## Requirements
 
@@ -49,8 +57,8 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 
 Create a new python environment and activate it:
 ```bash
-python -m venv env  # if not already created
-source env/bin/activate
+python -m venv venv  # if not already created
+source venv/bin/activate
 ```
 
 Install the required packages:
@@ -69,16 +77,33 @@ The model weights are available in the [Model weights release](https://github.co
 | MIRAGE-Large | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Large.pth) |
 
 
-## Benchmark
+## Inference
+
+The script `mirage_wrapper.py` provides a simple pipeline to load the model and run inference on a single sample.
+This sample is already included in the repository (`_example_images/`) and consists of a triplet of OCT, SLO, and layer segmentation images.
+
+To run the inference, simply execute the script:
+```bash
+python mirage_wrapper.py
+```
+
+Check the code for more details.
+
+
+
+## Evaluation benchmark
 
 We provide all the publicly available datasets used in the benchmark with the data splits.
 See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/classification_benchmark.md](docs/classification_benchmark.md) for more details on the classification and segmentation benchmarks, respectively.
 
 
-## Segmentation tuning
+## Tuning
 
 We provide the code to fine-tune MIRAGE and other state-of-the-art foundation models for OCT segmentation tasks.
 Please check the [docs/segmentation_tuning.md](docs/segmentation_tuning.md) for more details.
+
+We also provide the code to fine-tune the models for OCT and SLO classification tasks.
+More information can be found in the [docs/classification_tuning.md](docs/classification_tuning.md) file.
 
 
 ## Questions and issues

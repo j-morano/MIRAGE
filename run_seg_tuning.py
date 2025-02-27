@@ -1,6 +1,4 @@
 import argparse
-from argparse import HelpFormatter
-from operator import attrgetter
 import datetime
 import socket
 import json
@@ -17,7 +15,6 @@ import numpy as np
 from skimage import io
 import torch
 from torch import Tensor
-import torch.backends.cudnn as cudnn
 from torch.amp.autocast_mode import autocast
 from torchvision.utils import save_image
 import yaml
@@ -37,15 +34,9 @@ from mutils.datasets_semseg import build_semseg_dataset, simple_transform
 from mutils.optim_factory import LayerDecayValueAssigner, create_optimizer
 from mutils.semseg_metrics import mean_iou
 from mutils.gdice import CEGDiceLoss
-from mutils.misc import fix_seeds
+from mutils.misc import fix_seeds, SortingHelpFormatter
 from fm_seg_config import fm_factory
 
-
-
-class SortingHelpFormatter(HelpFormatter):
-    def add_arguments(self, actions):
-        actions = sorted(actions, key=attrgetter('option_strings'))
-        super(SortingHelpFormatter, self).add_arguments(actions)
 
 
 def get_args():
@@ -304,9 +295,8 @@ def get_args():
     )
 
     required_parser = parser.add_argument_group('required arguments')
-    # Finetuning parameters
     required_parser.add_argument(
-        '--finetune', required=True, type=str,
+        '--weights', required=True, type=str,
         help='Finetune from checkpoint (model weights). (required)'
     )
     required_parser.add_argument(
@@ -384,7 +374,7 @@ def process_args(args):
         / args.version
         / args.dataset_name
     ) + '/'
-    args.output_dir += Path(args.finetune).stem
+    args.output_dir += Path(args.weights).stem
     if args.freeze_encoder:
         args.output_dir += '_frozen'
     args.output_dir += f'_{args.output_adapter}'
@@ -407,11 +397,11 @@ def main(args):
 
     model_config = None
     for kw in fm_factory.keys():
-        if kw in args.finetune.lower():
+        if kw in args.weights.lower():
             model_config = fm_factory[kw]()
             break
     if model_config is None:
-        raise ValueError(f"Unknown finetune model: {args.finetune}")
+        raise ValueError(f"Unknown model: {args.weights}")
 
     # Forced minmax normalization
     if args.minmax:
@@ -570,13 +560,13 @@ def main(args):
         args=args,
     )
 
-    if args.finetune:
-        print('>> Loading weights from', args.finetune)
-        if args.finetune.startswith('https'):
+    if args.weights:
+        print('>> Loading weights from', args.weights)
+        if args.weights.startswith('https'):
             checkpoint = torch.hub.load_state_dict_from_url(
-                args.finetune, map_location='cpu')
+                args.weights, map_location='cpu')
         else:
-            checkpoint = torch.load(args.finetune, map_location='cpu', weights_only=False)
+            checkpoint = torch.load(args.weights, map_location='cpu', weights_only=False)
 
         model = model_config(model, checkpoint)
 

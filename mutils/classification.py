@@ -1,21 +1,16 @@
-import os
 from typing import Optional, Iterable, Union
 from collections import OrderedDict
 from pathlib import Path
 import math
-import random
 
 import numpy as np
 import torch
-from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from torch.optim import Optimizer
 from torch.amp.autocast_mode import autocast
 from torchvision.utils import save_image
-from torchvision import datasets
-from torchvision.datasets.folder import default_loader
-import torchvision.transforms as tvtr
-import torchvision.transforms.functional as VF
 from sklearn.metrics import (
     balanced_accuracy_score,
     f1_score,
@@ -23,7 +18,6 @@ from sklearn.metrics import (
     average_precision_score,
     matthews_corrcoef,
 )
-from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
 import mutils.lr_utils as lru
 
@@ -58,15 +52,11 @@ class EarlyStopping:
         self.start_from = start_from
 
     def __call__(self, value, value_two, epoch):
-        '''Returns True if the value is the best one so far, False
+        """Returns True if the value is the best one so far, False
         otherwise.
-        '''
+        """
         if (
             self.best_value is None
-            # or (
-            #     self.is_better(value, self.best_value)
-            #     and self.is_better_two(value_two, self.best_value_two)
-            # )
             or self.is_better(value, self.best_value)
             or ( # first value is the same, but second is better
                 self.is_same(value, self.best_value)
@@ -85,10 +75,10 @@ class EarlyStopping:
 
 
 def train_1_epoch(
-    model: torch.nn.Module,
-    criterion: torch.nn.Module,
-    data_loader: Iterable,
-    optimizer: torch.optim.Optimizer,
+    model: nn.Module,
+    criterion: nn.Module,
+    data_loader: DataLoader,
+    optimizer: Optimizer,
     device: torch.device,
     epoch: int,
     args=None,
@@ -103,8 +93,6 @@ def train_1_epoch(
         images, targets = batch[0], batch[-1]
         images = images.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
-        # if i == 0:
-        #     save_image(images, "images.png", normalize=True)
 
         # we use a per iteration (instead of per epoch) lr scheduler
         if i % args.accum_iter == 0:
@@ -187,7 +175,6 @@ def evaluate(
     device: torch.device,
     num_class: int,
     mode: str,
-    get_embeddings: bool = False,
     save_path: Optional[Union[str, Path]] = None,
     args=None,
     save_predictions: bool = False,
@@ -203,14 +190,6 @@ def evaluate(
     # switch to evaluation mode
     model.eval()
 
-    all_embeddings = {
-        'embeddings': None,
-        'targets': None
-    }
-    # Get dataloader length
-    data_loader_len = len(data_loader)  # type: ignore
-    period = max(int(round(0.1 * data_loader_len)), 1)
-    # assert period > 0
     for bi, batch in enumerate(data_loader):
         images = batch[0]
         targets = batch[-1]
@@ -218,65 +197,22 @@ def evaluate(
         targets = targets.to(device, non_blocking=True)
         true_label = F.one_hot(targets.to(torch.int64), num_classes=num_class)
 
-        # compute output
-        # TODO: Do we really want to use mixed precision here?
         with autocast('cuda', enabled=True):
             if (
-                (
-                    isinstance(epoch, int)
-                    and bi == 0
-                    and epoch % 10 == 0
-                    and args is not None
-                 )
-                or (
-                    get_embeddings
-                    and bi % period == 0
-                )
+                isinstance(epoch, int)
+                and bi == 0
+                and epoch % 10 == 0
+                and args is not None
             ):
+                # Save images for debugging
                 epoch_str = str(epoch).zfill(3)
-                if get_embeddings:
-                    assert save_path is not None
-                    output_dir = Path(save_path).parent
-                else:
-                    assert args is not None
-                    output_dir = args.output_dir
+                output_dir = args.output_dir
                 save_fn = Path(output_dir, "debug", f"{epoch_str}_{mode}_{bi}.jpg")
                 save_fn.parent.mkdir(exist_ok=True)
                 print('Saving images for debugging')
                 print('  images', images.shape, images.min().item(), images.max().item())
                 print('  targets', targets.shape, targets.min().item(), targets.max().item())
                 save_image(images, save_fn, normalize=True)
-            if get_embeddings:
-                # embeddings = model(images, get_embeddings=True)
-                # embeddings = model.features(images)
-                try:
-                    embeddings = model.forward_features(images)  # type: ignore
-                except AttributeError:
-                    embeddings = model(images)
-                if save_path is not None:
-                    for k, v in [('embeddings', embeddings), ('targets', targets)]:
-                        try:
-                            v.cpu()
-                        except AttributeError:
-                            v = v['x_norm_patchtokens']
-                            # Compute the average of the patch embeddings
-                            v = v.mean(dim=1)
-                        if all_embeddings[k] is None:
-                            all_embeddings[k] = v.cpu().detach().numpy()
-                        else:
-                            all_embeddings[k] = np.concatenate(
-                                [all_embeddings[k], v.cpu().detach().numpy()]  # type: ignore
-                            )
-                    print(all_embeddings['embeddings'].shape, all_embeddings['targets'].shape)
-                    # with open(save_fn, "wb") as f:
-                    #     pickle.dump(
-                    #         dict(
-                    #             embeddings=embeddings.cpu().detach().numpy(),
-                    #             targets=targets.cpu().detach().numpy(),
-                    #         ),
-                    #         f,
-                    #     )
-                continue
             output = model(images)
             loss = criterion(output, targets)
             losses.append(loss.item())
@@ -289,22 +225,6 @@ def evaluate(
             true_label_decode_list.extend(true_label_decode.cpu().detach().numpy())
             true_label_onehot_list.extend(true_label.cpu().detach().numpy())
             prediction_list.extend(prediction_softmax.cpu().detach().numpy())
-
-    if get_embeddings and save_path is not None:
-        assert all_embeddings['embeddings'] is not None
-        assert all_embeddings['targets'] is not None
-        save_fn = Path(save_path, "embeddings_targets.npz")
-        np.savez_compressed(
-            save_fn,
-            embeddings=all_embeddings['embeddings'],
-            targets=all_embeddings['targets']
-        )
-        # with open(save_fn, "wb") as f:
-        #     pickle.dump(all_embeddings, f)
-        return
-
-    # if get_embeddings:
-    #     return
 
     # gather the stats from all processes
     true_label_decode_list = np.array(true_label_decode_list)
@@ -360,291 +280,3 @@ def evaluate(
         'f1': f1,
         'mcc': mcc
     })
-
-
-
-class PartialImageFolder(datasets.ImageFolder):
-    def __init__(
-        self,
-        root,
-        transform=None,
-        target_transform=None,
-        loader=default_loader,
-        percentage=0.5,
-    ):
-        super(PartialImageFolder, self).__init__(
-            root, transform, target_transform, loader
-        )
-        self.percentage = percentage
-        self.sample_indices = self._generate_sample_indices()
-
-    def _generate_sample_indices(self):
-        sample_indices = {}
-        for target_class in self.classes:
-            class_dir = os.path.join(self.root, target_class)
-            all_images = os.listdir(class_dir)
-            num_samples = int(len(all_images) * self.percentage)
-            sample_indices[target_class] = random.sample(
-                range(len(all_images)), num_samples
-            )
-        return sample_indices
-
-    def __getitem__(self, index):
-        print(self.classes)
-        _path, target = self.samples[index]
-        class_samples = self.sample_indices[
-            self.classes[target]
-        ]  # Get samples for the target class
-        sample_index = class_samples[
-            index % len(class_samples)
-        ]  # Use modulo to handle index out of range
-        sample_path = os.path.join(self.samples[sample_index][0])
-        sample = self.loader(sample_path)
-        if self.transform is not None:
-            sample = self.transform(sample)
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-        return sample, target
-
-
-def build_dataset(subset, args, augment=False):
-    transform = build_transform(args, subset, augment)
-    root = os.path.join(args.data_path, subset)
-    if subset == "train" and args.label_efficiency_exp:
-        dataset = PartialImageFolder(
-            root, transform=transform, percentage=args.train_ds_perc
-        )
-    else:
-        dataset = datasets.ImageFolder(root, transform=transform)
-    return dataset
-
-
-class MinMaxScaler:
-    """
-    Transforms each channel to the range [0, 1].
-    """
-    def __call__(self, tensor):
-        return (tensor - tensor.min()) / (tensor.max() - tensor.min())
-
-
-class MinMaxScalerChannel:
-    def __init__(self) -> None:
-        super().__init__()
-        self.scaler = MinMaxScaler()
-
-    def __call__(self, tensor):
-        for i in range(tensor.shape[0]):
-            if tensor[i].max() > 0:
-                tensor[i] = self.scaler(tensor[i:i+1].clone())
-        return tensor
-
-
-class NaiveScaler:
-    """
-    Transforms each channel to the range [0, 1], if it is not already.
-    """
-    def __call__(self, tensor):
-        if tensor.min() < 0:
-            raise ValueError("Tensor contains negative values")
-        elif tensor.max() > 1 and tensor.max() <= 255:
-            tensor = tensor / 255.0
-        elif tensor.max() > 255:
-            tensor = tensor / 65535.0
-        return tensor
-
-
-class NaiveScalerChannel:
-    """
-    Transforms each channel to the range [0, 1], if it is not already.
-    """
-    def __init__(self) -> None:
-        super().__init__()
-        self.scaler = NaiveScaler()
-
-    def __call__(self, tensor):
-        for i in range(tensor.shape[0]):
-            tensor[i] = self.scaler(tensor[i:i+1].clone())
-        return tensor
-
-
-class Identity:
-    def __call__(self, img):
-        return img
-
-
-class ToRGB:
-    def __call__(self, img: torch.Tensor):
-        return img.repeat(3, 1, 1)
-
-
-class RandomIntensity(nn.Module):
-    def __init__(self, intensity_range=(0.8, 1.2)):
-        super().__init__()
-        self.intensity_range = intensity_range
-
-    @staticmethod
-    def get_abs_max(tensor):
-        if tensor.max() <= 1:
-            abs_max = 1
-        elif tensor.max() > 1 and tensor.max() <= 255:
-            abs_max = 255
-        elif tensor.max() > 255:
-            abs_max = 65535
-        else:
-            raise ValueError(
-                "Image values are not in the expected range:"
-                f" [{tensor.max()}, {tensor.min()}], {torch.unique(tensor)}"
-            )
-        return abs_max
-
-    def forward(self, img):
-        intensity = torch.empty(1).uniform_(*self.intensity_range).item()
-        return torch.clamp(img * intensity, 0, self.get_abs_max(img))
-
-
-class RandomIntensityChannel(nn.Module):
-    def __init__(self, intensity_range=(0.8, 1.2)):
-        super().__init__()
-        self.intensity_range = intensity_range
-        self.intensity = RandomIntensity(intensity_range)
-
-    def forward(self, img):
-        for i in range(img.shape[0]):
-            if img[i].max() > 0:
-                img[i] = self.intensity(img[i:i+1].clone())
-        return img
-
-
-class RandomAffineChannel(tvtr.RandomAffine):
-    """Same as RandomAffine but with a random rotation for every
-    channel.
-    """
-    def __init__(self, p=1.0, **kwargs):
-        super().__init__(**kwargs)
-        self.p = p
-
-    def forward(self, img):
-        """
-            img (PIL Image or Tensor): Image to be transformed.
-
-        Returns:
-            PIL Image or Tensor: Affine transformed image.
-        """
-        if random.random() < (1 - self.p):
-            return img
-
-        if self.fill == 0.5:
-            fill = random.uniform(img.min().item(), img.max().item())
-        else:
-            fill = self.fill
-        if isinstance(img, Tensor):
-            if isinstance(fill, (int, float)):
-                fill = [float(fill)]
-            else:
-                fill = [float(f) for f in fill]  # type: ignore
-
-        img_size = VF.get_image_size(img)
-
-        for i in range(img.shape[0]):
-            # Apply a transformation only in 90% of the cases
-            if random.random() < 0.9:
-                ret = self.get_params(
-                    self.degrees, self.translate, self.scale, self.shear,
-                    img_size
-                )
-                img[i] = VF.affine(
-                    img[i:i+1].clone(), *ret, interpolation=self.interpolation,
-                    fill=fill, center=self.center  # type: ignore
-                )
-        return img
-
-
-def build_transform(args, subset, augment):
-    multimodal = len(args.input_modality.split('-')) > 1
-    if multimodal:
-        end = 'for multimodal data'
-    else:
-        end = ''
-    print(f'>>> Building transform "{subset}"', end)
-    intensity_msg = 'Random intensity shift'
-    intensity = RandomIntensityChannel()
-    if args.fill is None:
-        if 'kermany' in args.data_set.lower():
-            fill = 1
-        else:
-            fill = 0
-    else:
-        fill = args.fill
-    affine_msg = f'Random affine (fill={fill})'
-    affine = RandomAffineChannel(
-        degrees=10,
-        translate=(0.1, 0.1),
-        scale=(0.9, 1.1),
-        shear=5,
-        interpolation=tvtr.InterpolationMode.BILINEAR,
-        fill=fill,
-    )
-    if args.no_affine:
-        affine_msg = 'No random affine'
-        affine = Identity()
-    grayscale = Identity()
-    min_max = Identity()
-    scaler_list = [ NaiveScalerChannel() ]
-    if not multimodal:
-        grayscale = tvtr.Grayscale(num_output_channels=1)
-    if args.model == 'MIRAGE':
-        # If it is any of our models
-        scaler_msg = 'Naive scaler'
-        if args.no_minmax:
-            scaler_list = [ Identity() ]
-            min_max = Identity()
-        else:
-            scaler_list += [ MinMaxScalerChannel() ]
-            min_max = MinMaxScalerChannel()
-    elif args.model == 'VisionFM':
-        # OCT standard mean and std for VisionFM
-        # https://github.com/ABILab-CUHK/VisionFM/blob/main/utils.py#L46
-        mean = (0.21091926, 0.21091926, 0.21091919)
-        std = (0.17598894, 0.17598891, 0.17598893)
-        scaler_msg = 'OCT scaler'
-        if not multimodal:
-            # First to RGB, then normalize
-            scaler_list += [ ToRGB() ]
-        scaler_list += [
-            tvtr.Normalize(mean, std)
-        ]
-    else:
-        # If it is a SOTA model
-        scaler_msg = 'ImageNet scaler'
-        if not multimodal:
-            # First to RGB, then normalize
-            scaler_list += [ ToRGB() ]
-        scaler_list += [
-            tvtr.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD)
-        ]
-
-    transforms_list = [
-        tvtr.Resize(
-            size=(args.input_size, args.input_size),
-            interpolation=tvtr.InterpolationMode.BILINEAR,
-        ),
-        grayscale,
-        tvtr.ToTensor(),
-        tvtr.ConvertImageDtype(torch.float32),
-        min_max,
-    ]
-    if augment:
-        print('Random horizontal flip (0.5)')
-        print(intensity_msg)
-        print(affine_msg)
-        transforms_list += [
-            tvtr.RandomHorizontalFlip(p=0.5),
-            intensity,
-            affine,
-        ]
-    print(scaler_msg)
-    transforms_list += scaler_list
-    transforms = tvtr.Compose(transforms_list)
-
-    return transforms
-
