@@ -30,12 +30,12 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 - [x] Classification tuning code
 - [x] Classification evaluation code
 - [x] Segmentation tuning code
+- [x] Detailed documentation
 - [ ] Segmentation evaluation code
-- [ ] Detailed documentation
+- [ ] Pretraining code
 
 <!-- - [ ] Detailed classification results -->
 <!-- - [ ] Detailed segmentation results -->
-<!-- - [ ] Pretraining code -->
 
 
 ## Quick start

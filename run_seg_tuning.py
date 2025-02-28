@@ -369,8 +369,6 @@ def process_args(args):
 
     args.output_dir = str(
         Path(args.base_output_dir)
-        / 'finetune'
-        / 'semseg'
         / args.version
         / args.dataset_name
     ) + '/'

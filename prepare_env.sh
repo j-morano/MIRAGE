@@ -2,42 +2,37 @@
 
 ################################################################################
 # prepare_env.sh
-#
-# This script prepares the environment for the project
-# It receives two arguments:
-# 1. The weights to download
-#   - 'all' for all weights (default)
-#   - 'base' for the base model weights
-#   - 'large' for the large model weights
-#   - 'none' for no weights
-# 2. The datasets to download
-#   - 'all' for all datasets (default)
-#   - 'classification' for the classification datasets
-#   - 'segmentation' for the segmentation datasets
-#   - 'none' for no datasets
-#   - 'classification-non-cross' for the classification datasets without the
-#       cross-dataset evaluation datasets.
-#   - 'segmentation-non-cross' for the segmentation datasets without the
-#       cross-dataset evaluation datasets.
-# 3. (optional) nodelete: if present, the downloaded files will not be deleted
-# 4. (optional) ignorepython: if present, the script will not check the python
-#      version and will not download python 3.10.16.
-# 5. (optional) --help | -h: print the usage and exit
 
-# Check if the script is being run with the correct number of arguments
-# If not, print the usage and exit
+# This script prepares the environment for the project, including creating a
+# virtual environment, installing the required packages, downloading the model
+# weights, and downloading the datasets.
 
 
 ################################################################################
 # Parse the arguments
 
 function print_usage() {
-    echo 'Usage: ./prepare_env.sh <weights> <datasets> [nodelete] [ignorepython]'
-    echo '  <weights>: base | large | all | none'
-    echo '  <datasets>: classification | segmentation | all | none'
-    echo '  [nodelete]: if present, the downloaded files will not be deleted'
-    echo '  [ignorepython]: if present, the script will not check the python version'
-    exit
+cat << EOF
+Usage: ./prepare_env.sh <weights> <datasets> [nodelete] [ignorepython]
+    <weights>: base | large | all | none
+         - all: download all weights (default)
+         - base: only download the base model weights
+         - large: only download the large model weights
+         - none: do not download any weights
+    <datasets>: classification | segmentation | all | none
+               | classification-non-cross | segmentation-non-cross
+         - all: download all datasets (default)
+         - classification: only download the classification datasets
+         - segmentation: only download the segmentation datasets
+         - none: do not download any dataset
+         - classification-non-cross: download the classification datasets
+              without the cross-dataset evaluation datasets
+         - segmentation-non-cross: download the segmentation datasets without
+              the cross-dataset evaluation datasets
+    [nodelete]: if present, the downloaded files will not be deleted
+    [ignorepython]: if present, the script will not check the python version
+EOF
+exit
 }
 
 
@@ -132,6 +127,7 @@ function download() {
 check_files_starting_with() {
     local dir="$1"
     local prefix="$2"
+    local is_part=$3
 
     # Check if the directory exists
     if [ ! -d "$dir" ]; then
@@ -144,7 +140,15 @@ check_files_starting_with() {
         # Check if the file is a regular file and starts with the prefix
         if [[ "$(basename "$file")" == "$prefix"* ]]; then
             # echo "File '$file' starts with '$prefix'."
-            return 0
+            # or ends with .zip
+            if [ $is_part == true ]; then
+                if [[ -d "$file" ]] || [[ "$(basename "$file")" == "$prefix.zip" ]]; then
+                    # echo "File '$file' is a part."
+                    return 0
+                fi
+            else
+                return 0
+            fi
         fi
     done
 
@@ -157,15 +161,14 @@ function download_to_dir() {
     # Args:
     #  - $1: URL to download
     #  - $2: directory to save the file
-    #  Check if '_part_a' in the name, if so, get the prefix before '_part_a',
-    #    otherwise, get the prefix before '.'
-    local prefix=''
     if [[ $1 == *_part_a* ]]; then
         prefix=$(basename ${1%_part_a*})
+        is_part=true
     else
         prefix=$(basename ${1%.*})
+        is_part=false
     fi
-    if check_files_starting_with $2 $prefix; then
+    if check_files_starting_with $2 $prefix $is_part; then
         echo '  📥 "'$(basename $1)'" already downloaded'
         return
     fi
@@ -178,10 +181,12 @@ function download_to_dir() {
 function remove() {
     # Args:
     # - $1: file to remove
-    if [ -f $1 ] && [ $nodelete == false ]; then
-        echo '  🗑️ Removing file '$1
-        rm $1
-    fi
+    for file in $1; do
+        if [ -f $file ]; then
+            echo '  🗑️ Removing file '$file
+            rm $file
+        fi
+    done
 }
 
 
@@ -196,6 +201,23 @@ function extract_files() {
             remove $file
         fi
     done
+}
+
+
+function join_dataset() {
+    # Args:
+    # - $1: directory containing the dataset parts
+    # - $2: name of the dataset
+    local dir=$1
+    local dataset=$2
+    if [ ! -f $dir/$dataset.zip ] && [ ! -d $dir/$dataset ]; then
+        echo '  🧩 Combining '$dataset' parts'
+        cat $dir/$dataset'_part_'* > $dir/$dataset.zip
+        if [ $nodelete == false ]; then
+            echo '  🗑️ Removing '$dataset' parts'
+            rm $dir/$dataset'_part_'*
+        fi
+    fi
 }
 
 
@@ -306,20 +328,12 @@ if [ $datasets == 'segmentation' ] || [ $datasets == 'all' ] || [ $datasets == '
         download_to_dir $BASE_URL'/seg-data/Duke_iAMD_labeled_part_af' $dir
         download_to_dir $BASE_URL'/seg-data/Duke_iAMD_labeled_part_ag' $dir
         download_to_dir $BASE_URL'/seg-data/Duke_iAMD_labeled_part_ah' $dir
-        if [ ! -f $dir/Duke_iAMD_labeled.zip ] && [ ! -d $dir/Duke_iAMD_labeled ]; then
-            echo '  🧩 Combining Duke_iAMD_labeled parts'
-            cat $dir/Duke_iAMD_labeled_part_* > $dir/Duke_iAMD_labeled.zip
-            remove $dir/Duke_iAMD_labeled_part_*
-        fi
+        join_dataset $dir 'Duke_iAMD_labeled'
     fi
     download_to_dir $BASE_URL'/seg-data/GOALS.zip' $dir
     download_to_dir $BASE_URL'/seg-data/RETOUCH_part_aa' $dir
     download_to_dir $BASE_URL'/seg-data/RETOUCH_part_ab' $dir
-    if [ ! -f $dir/RETOUCH.zip ] && [ ! -d $dir/RETOUCH ]; then
-        echo '  🧩 Combining RETOUCH parts'
-        cat $dir/RETOUCH_part_* > $dir/RETOUCH.zip
-        remove $dir/RETOUCH_part_*
-    fi
+    join_dataset $dir 'RETOUCH'
     extract_files $dir
 fi
 
