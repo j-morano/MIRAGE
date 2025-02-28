@@ -232,9 +232,9 @@ if [[ ! $version == 3.10* ]] && [ $ignorepython == false ]; then
         cd ..
     fi
     if [ -d venv ]; then
-        echo '  🐉 Python environment already exists'
+        echo '  🐉 Python environment (Python 3.10.16) already exists'
     else
-        echo '  🐉 Creating Python environment...'
+        echo '  🐉 Creating Python environment using Python 3.10.16...'
         ./Python-3.10.16/python -m venv venv
     fi
 else
