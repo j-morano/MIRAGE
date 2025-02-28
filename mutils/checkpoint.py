@@ -10,23 +10,26 @@ def save_model(args, epoch, model, optimizer, loss_scaler, loss_balancer=None):
     output_dir = Path(args.output_dir)
     epoch_name = str(epoch)
     if loss_scaler is not None:
-        checkpoint_paths = [output_dir / ('checkpoint-%s.pth' % epoch_name)]
-        for checkpoint_path in checkpoint_paths:
-            to_save = {
-                'model': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'epoch': epoch,
-                'scaler': loss_scaler.state_dict(),
-                'args': args
-            }
+        checkpoint_path = output_dir / ('checkpoint-%s.pth' % epoch_name)
+        to_save = {
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'epoch': epoch,
+            'scaler': loss_scaler.state_dict(),
+            'args': args
+        }
 
-            if loss_balancer is not None:
-                to_save['loss_balancer'] = loss_balancer.state_dict()
+        if loss_balancer is not None:
+            to_save['loss_balancer'] = loss_balancer.state_dict()
 
-            torch.save(to_save, checkpoint_path)
+        torch.save(to_save, checkpoint_path)
     else:
         client_state = {'epoch': epoch}
-        model.save_checkpoint(save_dir=args.output_dir, tag="checkpoint-%s" % epoch_name, client_state=client_state)
+        model.save_checkpoint(
+            save_dir=args.output_dir,
+            tag="checkpoint-%s" % epoch_name,
+            client_state=client_state
+        )
 
 
 def auto_load_model(
