@@ -334,13 +334,6 @@ def process_args(args):
         for i, s in enumerate(size):
             args.grid_sizes[domain].append(s // args.patch_size[domain][i])
 
-    if socket.gethostname() == 'hemingway':
-        # args.batch_size = 2
-        # args.num_workers = 1
-        args.input_size = {
-            args.in_domains[0]: [256, 256],
-        }
-
     args.data_path = Path(args.data_path)
     args.dataset_name = args.data_path.stem
     args.train_data_path = args.data_path / 'train'
