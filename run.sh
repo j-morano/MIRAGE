@@ -10,7 +10,7 @@
         ./__weights/MIRAGE-Large.pth \
     --linear_probing \
     --data_root \
-        ~/tmp/MIRAGE_DATASETS/Classification \
+        ./__datasets/Classification \
     --data_set \
         GAMMA
 exit
@@ -27,5 +27,5 @@ exit
         ./__weights/MIRAGE-Base.pth \
         ./__weights/MIRAGE-Large.pth \
     --data_path \
-        ~/tmp/MIRAGE_DATASETS/Segmentation/Duke_DME/
+        ./__datasets/Segmentation/Duke_DME/
 exit

@@ -31,7 +31,7 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
         ./__weights/MIRAGE-Large.pth \
     --linear_probing \
     --data_root \
-        ~/tmp/MIRAGE_DATASETS/Classification \
+        ./__datasets/Classification \
     --data_set \
         GAMMA
 ```

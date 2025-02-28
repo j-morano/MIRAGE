@@ -31,7 +31,7 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
         ./__weights/MIRAGE-Base.pth \
         ./__weights/MIRAGE-Large.pth \
     --data_path \
-        ~/tmp/MIRAGE_DATASETS/Segmentation/Duke_DME/
+        ./__datasets/Segmentation/Duke_DME/
 ```
 
 You can run `python run_seg_tuning.py --help` to see the available arguments and their descriptions.
