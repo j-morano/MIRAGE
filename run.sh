@@ -1,4 +1,7 @@
 
+source ./venv/bin/activate
+
+
 # Classification
 ./runner python run_cls_tuning.py \
     --runners 1 \
