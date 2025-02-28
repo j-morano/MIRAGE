@@ -52,6 +52,9 @@ For a quick start, use the provided script [prepare_env.sh](prepare_env.sh) to c
 ./prepare_env.sh
 ```
 
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
 
 ## Requirements
 
