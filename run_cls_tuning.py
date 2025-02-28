@@ -92,7 +92,7 @@ def get_args():
     )
     parser.add_argument(
         '--base_output_dir',
-        default='./__output_cls',
+        default='./__output/cls',
         help='Base output directory for saving results. (default: %(default)s)',
     )
 

@@ -46,7 +46,6 @@ def make_nonclass_dataset(
         for fname in sorted(fnames):
             path = os.path.join(root, fname)
             if c_is_valid_file(path):
-                # Only include files that are in the fsids list
                 item = path, 0
                 instances.append(item)
     return instances

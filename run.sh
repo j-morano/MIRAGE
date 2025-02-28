@@ -25,7 +25,7 @@ exit
     -- \
     --version v1 \
     --config \
-        ./_cfgs/ft_semseg_200e_convnext.yaml \
+        ./_cfgs/seg_200e_convnext.yaml \
     --weights \
         ./__weights/MIRAGE-Base.pth \
         ./__weights/MIRAGE-Large.pth \

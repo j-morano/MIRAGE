@@ -38,7 +38,7 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
 
 You can run `python run_cls_tuning.py --help` to see the available arguments and their descriptions.
 
-By default, the script will save the model weights and the training logs in the `./__output_cls` directory.
+By default, the script will save the model weights and the training logs in the `./__output/cls` directory.
 You can specify a different output directory using the `--base_output_dir` argument.
 
 > [!IMPORTANT]

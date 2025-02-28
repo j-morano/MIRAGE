@@ -15,6 +15,10 @@ from mutils.factory import get_factory_adder
 
 
 
+add_model, model_factory = get_factory_adder()
+
+
+
 class MIRAGEModel(nn.Module):
     """MIRAGE model.
     This module performs masking in its forward pass.
@@ -427,6 +431,50 @@ class MIRAGEModel(nn.Module):
         return preds, task_masks
 
 
+@add_model
+def miragepre_base(
+    input_adapters: Dict[str, nn.Module],
+    output_adapters: Optional[Dict[str, nn.Module]],
+    args,
+    **kwargs
+):
+    model = MIRAGEModel(
+        args,
+        input_adapters=input_adapters,
+        output_adapters=output_adapters,
+        dim_tokens=768,
+        depth=12,
+        num_heads=12,
+        mlp_ratio=4,
+        qkv_bias=True,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs
+    )
+    return model
+
+
+@add_model
+def miragepre_large(
+    input_adapters: Dict[str, nn.Module],
+    output_adapters: Optional[Dict[str, nn.Module]],
+    args,
+    **kwargs
+):
+    model = MIRAGEModel(
+        args,
+        input_adapters=input_adapters,
+        output_adapters=output_adapters,
+        dim_tokens=1024,
+        depth=24,
+        num_heads=16,
+        mlp_ratio=4,
+        qkv_bias=True,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs
+    )
+    return model
+
+
 class MIRAGELight(MIRAGEModel):
     """MultiViT: Multi-modal Vision Transformer
     This is MIRAGE without masking and with a simplified / faster forward pass
@@ -517,10 +565,6 @@ class MIRAGELight(MIRAGEModel):
         }
 
         return preds
-
-
-
-add_model, model_factory = get_factory_adder()
 
 
 @add_model

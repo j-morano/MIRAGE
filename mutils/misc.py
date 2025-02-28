@@ -25,34 +25,37 @@ def fix_seeds(seed):
     cudnn.benchmark = True
 
 
-def save_model(args, epoch, model, optimizer):
+def save_model(args, epoch, model, optimizer, loss_scaler=None):
     torch.save(
         {
-            "model": model,
-            "optimizer": optimizer,
-            "epoch": epoch,
-            "args": args,
+            'model': model,
+            'optimizer': optimizer,
+            'epoch': epoch,
+            'args': args,
+            'loss_scaler': loss_scaler,
         },
-        f"{args.output_dir}/checkpoint-best-model.pth",
+        f'{args.output_dir}/checkpoint-best-model.pth',
     )
 
 
-def load_model(args, model, optimizer):
+def load_model(args, model, optimizer, loss_scaler=None):
     if args.resume:
-        if args.resume.startswith("https"):
+        if args.resume.startswith('https'):
             checkpoint = torch.hub.load_state_dict_from_url(
-                args.resume, map_location="cpu", check_hash=True
+                args.resume, map_location='cpu', check_hash=True
             )
         else:
-            checkpoint = torch.load(args.resume, map_location="cpu")
-        model.load_state_dict(checkpoint["model"])
-        print("Resume checkpoint %s" % args.resume)
+            checkpoint = torch.load(args.resume, map_location='cpu')
+        model.load_state_dict(checkpoint['model'])
+        print('Resume checkpoint %s' % args.resume)
         if (
-            "optimizer" in checkpoint
-            and "epoch" in checkpoint
-            and not (hasattr(args, "eval") and args.eval)
+            'optimizer' in checkpoint
+            and 'epoch' in checkpoint
+            and not (hasattr(args, 'eval') and args.eval)
             and optimizer is not None
         ):
-            optimizer.load_state_dict(checkpoint["optimizer"])
-            args.start_epoch = checkpoint["epoch"] + 1
-            print("With optim & sched!")
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            args.start_epoch = checkpoint['epoch'] + 1
+            if 'scaler' in checkpoint and loss_scaler is not None:
+                loss_scaler.load_state_dict(checkpoint['loss_scaler'])
+            print('With optim & sched!')

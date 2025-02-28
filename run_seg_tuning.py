@@ -219,7 +219,7 @@ def get_args():
 
     # Runtime parameters
     parser.add_argument(
-        '--base_output_dir', default='./__output_seg', type=str,
+        '--base_output_dir', default='./__output/seg', type=str,
         help='Base output directory. (default: %(default)s)'
     )
     parser.add_argument(

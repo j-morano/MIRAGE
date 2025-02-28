@@ -15,7 +15,7 @@ The OCT segmentation datasets are available in [docs/segmentation_benchmark.md](
 
 ## Usage
 
-The script `run_seg_tuning.py` provides the main entry point to tune the models. It supports several command-line arguments to configure the training process. In addition, configuration files (in YAML) can be used to specify theses arguments. The default configuration, used for the experiments in the paper, is available in [_cfgs/ft_semseg_200e_convnext.yaml](../_cfgs/ft_semseg_200e_convnext.yaml).
+The script `run_seg_tuning.py` provides the main entry point to tune the models. It supports several command-line arguments to configure the training process. In addition, configuration files (in YAML) can be used to specify theses arguments. The default configuration, used for the experiments in the paper, is available in [_cfgs/seg_200e_convnext.yaml](../_cfgs/seg_200e_convnext.yaml).
 
 We also provide the utility script `runner` to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
@@ -26,7 +26,7 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
     -- \
     --version v1 \
     --config \
-        ./_cfgs/ft_semseg_200e_convnext.yaml \
+        ./_cfgs/seg_200e_convnext.yaml \
     --weights \
         ./__weights/MIRAGE-Base.pth \
         ./__weights/MIRAGE-Large.pth \
@@ -36,9 +36,9 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
 
 You can run `python run_seg_tuning.py --help` to see the available arguments and their descriptions.
 These arguments can also be specified in a YAML configuration file.
-See [_cfgs/ft_semseg_200e_convnext.yaml](../_cfgs/ft_semseg_200e_convnext.yaml) for an example and the default configuration used in the paper.
+See [_cfgs/seg_200e_convnext.yaml](../_cfgs/seg_200e_convnext.yaml) for an example and the default configuration used in the paper.
 
-By default, the script will save the model weights and the training logs in the `./__output_seg` directory.
+By default, the script will save the model weights and the training logs in the `./__output/seg` directory.
 You can specify a different output directory using the `--base_output_dir` argument.
 
 > [!IMPORTANT]
