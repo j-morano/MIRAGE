@@ -45,7 +45,7 @@ For a quick start, use the provided script [prepare_env.sh](prepare_env.sh) to c
 > [!IMPORTANT]
 > The script will download the model weights and the datasets, which are large files. Make sure you have enough disk space and a stable internet connection.
 >
-> In addition, it will install Python 3.10.16 in the same folder if it detects that the system Python version is not 3.10.*.
+> In addition, it will install Python 3.10.16 (from source) in the same folder if it detects that the system Python version is not 3.10.*.
 
 
 ```bash
