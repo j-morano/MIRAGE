@@ -175,6 +175,16 @@ function download_to_dir() {
 }
 
 
+function remove() {
+    # Args:
+    # - $1: file to remove
+    if [ -f $1 ] && [ $nodelete == false ]; then
+        echo '  🗑️ Removing file '$1
+        rm $1
+    fi
+}
+
+
 function extract_files() {
     export UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE
     # Args:
@@ -183,9 +193,7 @@ function extract_files() {
         if [ -f $file ]; then
             echo '  📦 Extracting '$file
             unzip -q $file -d $dir
-            if [ ! $3 ]; then
-                rm $file
-            fi
+            remove $file
         fi
     done
 }
@@ -201,7 +209,7 @@ step '🐍 Creating and activating virtual environment'
 version=$(python --version | cut -d ' ' -f 2)
 echo "  🐍 System Python version: $version"
 # If python version does not start with '3.10', download and install python 3.10
-if [[ ! $version == 3.10* ]] && [ ! $ignorepython ]; then
+if [[ ! $version == 3.10* ]] && [ $ignorepython == false ]; then
     if [ -d Python-3.10.16 ]; then
         echo '  📥 Python 3.10.16 already downloaded'
     else
@@ -217,9 +225,7 @@ if [[ ! $version == 3.10* ]] && [ ! $ignorepython ]; then
         echo '  📥 Downloading Python 3.10.16...'
         download https://www.python.org/ftp/python/3.10.16/Python-3.10.16.tgz
         tar -xvf Python-3.10.16.tgz
-        if [ ! $3 ]; then
-            rm Python-3.10.16.tgz
-        fi
+        remove Python-3.10.16.tgz
         cd Python-3.10.16
         ./configure --enable-optimizations
         make
@@ -303,9 +309,7 @@ if [ $datasets == 'segmentation' ] || [ $datasets == 'all' ] || [ $datasets == '
         if [ ! -f $dir/Duke_iAMD_labeled.zip ] && [ ! -d $dir/Duke_iAMD_labeled ]; then
             echo '  🧩 Combining Duke_iAMD_labeled parts'
             cat $dir/Duke_iAMD_labeled_part_* > $dir/Duke_iAMD_labeled.zip
-            if [ ! $3 ]; then
-                rm $dir/Duke_iAMD_labeled_part_*
-            fi
+            remove $dir/Duke_iAMD_labeled_part_*
         fi
     fi
     download_to_dir $BASE_URL'/seg-data/GOALS.zip' $dir
@@ -314,9 +318,7 @@ if [ $datasets == 'segmentation' ] || [ $datasets == 'all' ] || [ $datasets == '
     if [ ! -f $dir/RETOUCH.zip ] && [ ! -d $dir/RETOUCH ]; then
         echo '  🧩 Combining RETOUCH parts'
         cat $dir/RETOUCH_part_* > $dir/RETOUCH.zip
-        if [ ! $3 ]; then
-            rm $dir/RETOUCH_part_*
-        fi
+        remove $dir/RETOUCH_part_*
     fi
     extract_files $dir
 fi
