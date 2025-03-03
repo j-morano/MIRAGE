@@ -161,7 +161,7 @@ This project is under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for detai
 
 ## Acknowledgements
 
-MIRAGE code is mainly based on MultiMAE, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, mmsegmentation, and MONAI.
+MIRAGE code is mainly based on MultiMAE, along with timm, DeiT, DINO, MoCo-v3, BEiT, MAE-priv, MAE, mmsegmentation, MONAI, and RETFound.
 We thank the authors for making their code available.
 
 * <https://github.com/EPFL-VILAB/MultiMAE>
@@ -174,3 +174,4 @@ We thank the authors for making their code available.
 * <https://github.com/facebookresearch/mae>
 * <https://github.com/open-mmlab/mmsegmentation>
 * <https://github.com/Project-MONAI/MONAI>
+* <https://github.com/rmaphoh/RETFound_MAE>
