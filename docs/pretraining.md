@@ -52,7 +52,6 @@ Below we provide an example to pretraing MIRAGE (both Base and Large) on the mul
     --weights \
         ./__weights/multimae-b_98_rgb+-depth-semseg_1600e_multivit-afff3f8c.pth \
         ./__weights/mae_pretrain_vit_large.pth
-exit
 ```
 
 > [!IMPORTANT]
