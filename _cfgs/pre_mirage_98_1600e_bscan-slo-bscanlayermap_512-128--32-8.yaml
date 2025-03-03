@@ -1,0 +1,32 @@
+# Input and output tasks
+in_domains: bscan-slo-bscanlayermap
+out_domains: bscan-slo-bscanlayermap
+
+# Architecture
+decoder_dim: 256
+input_size:
+  bscan: [512, 512]
+  slo: [512, 512]
+  bscanlayermap: [128, 128]
+patch_size:
+  bscan: [32, 32]
+  slo: [32, 32]
+  bscanlayermap: [8, 8]
+alphas: 1.0  # Dirichlet concentration parameter
+num_encoded_tokens: 98 # Total would be 196 * 3 patches. 196 / 2 = 98
+num_global_tokens: 1
+decoder_use_task_queries: True
+decoder_depth: 2
+
+# Train
+epochs: 1600
+opt: adamw
+blr: 0.0001 # this is base_lr = 1e-4, lr = base_lr * batch_size / 256
+warmup_lr: 0.000001 # 1e-6
+min_lr: 0.
+warmup_epochs: 40
+batch_size: 256
+hflip: 0.5
+intensity_shift: 0.1
+affine: True
+loss_on_unmasked: False

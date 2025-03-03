@@ -17,7 +17,7 @@ The OCT segmentation datasets are available in [docs/classification_benchmark.md
 
 The script `run_cls_tuning.py` provides the main entry point to tune the models. It supports several command-line arguments to configure the training process.
 
-We also provide the utility script `runner` to run multiple experiments easily by specifying multiple entries for the same argument.
+We also provide the utility script `runner` (see [docs/runner.md](../docs/runner.md)) to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
 
 ```bash

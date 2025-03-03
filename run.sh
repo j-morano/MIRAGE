@@ -2,6 +2,19 @@
 source ./venv/bin/activate
 
 
+# Pretraining
+./runner python run_pretraining.py \
+    --runners 1 \
+    -- \
+    --config ./_cfgs/pre_mirage_98_1600e_bscan-slo-bscanlayermap_512-128--32-8.yaml \
+    --data_path \
+        ./__datasets/Pretraining/ \
+    --weights \
+        ./__weights/multimae-b_98_rgb+-depth-semseg_1600e_multivit-afff3f8c.pth \
+        ./__weights/mae_pretrain_vit_large.pth
+exit
+
+
 # Classification
 ./runner python run_cls_tuning.py \
     --runners 1 \

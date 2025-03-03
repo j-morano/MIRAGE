@@ -7,7 +7,9 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image 
 
 > [!IMPORTANT]
 > This repository is under construction. Check the [TODO](#todo) section for the current status.
->
+
+
+> [!IMPORTANT]
 > All scripts and code are intended to run on Linux systems.
 
 
@@ -34,8 +36,8 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 - [x] Segmentation tuning code
 - [x] Detailed documentation
 - [x] Quick start script
-- [ ] Segmentation evaluation code
-- [ ] Pretraining code
+- [x] Pretraining code
+- [ ] Segmentation final evaluation code
 
 <!-- - [ ] Detailed classification results -->
 <!-- - [ ] Detailed segmentation results -->
@@ -106,7 +108,13 @@ Check the code for more details.
 ## Evaluation benchmark
 
 We provide all the publicly available datasets used in the benchmark with the data splits.
-See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) and [docs/classification_benchmark.md](docs/classification_benchmark.md) for more details on the classification and segmentation benchmarks, respectively.
+See [docs/segmentation_benchmark.md](docs/segmentation_benchmark.md) for more details on the segmentation benchmark, and [docs/classification_benchmark.md](docs/classification_benchmark.md) for the classification benchmark.
+
+
+## Pretraining
+
+Although we do not provide the pretraining data due to privacy concerns, we provide the code to pretrain MIRAGE on a multimodal dataset.
+Please check the [docs/pretraining.md](docs/pretraining.md) for more details.
 
 
 ## Tuning
