@@ -41,6 +41,9 @@ This arguments can also be provided in a configuration file. See [_cfgs/pre_mira
 We also provide the utility script `runner` (see [docs/runner.md](../docs/runner.md)) to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to pretraing MIRAGE (both Base and Large) on the multimodal dataset.
 
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
 
 ```bash
 ./runner python run_pretraining.py \

@@ -20,6 +20,7 @@ The script `run_seg_tuning.py` provides the main entry point to tune the models.
 We also provide the utility script `runner` (see [docs/runner.md](../docs/runner.md)) to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
 
+
 ```bash
 ./runner python run_seg_tuning.py \
     --runners 1 \
@@ -34,9 +35,9 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
         ./__datasets/Segmentation/Duke_DME/
 ```
 
-You can run `python run_seg_tuning.py --help` to see the available arguments and their descriptions.
-These arguments can also be specified in a YAML configuration file.
-See [_cfgs/seg_200e_convnext.yaml](../_cfgs/seg_200e_convnext.yaml) for an example and the default configuration used in the paper.
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
 
 By default, the script will save the model weights and the training logs in the `./__output/seg` directory.
 You can specify a different output directory using the `--base_output_dir` argument.

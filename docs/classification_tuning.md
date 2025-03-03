@@ -20,6 +20,7 @@ The script `run_cls_tuning.py` provides the main entry point to tune the models.
 We also provide the utility script `runner` (see [docs/runner.md](../docs/runner.md)) to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME dataset.
 
+
 ```bash
 ./runner python run_cls_tuning.py \
     --runners 1 \
@@ -36,7 +37,9 @@ Below we provide an example to tune MIRAGE (both Base and Large) on the Duke DME
         GAMMA
 ```
 
-You can run `python run_cls_tuning.py --help` to see the available arguments and their descriptions.
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
 
 By default, the script will save the model weights and the training logs in the `./__output/cls` directory.
 You can specify a different output directory using the `--base_output_dir` argument.
