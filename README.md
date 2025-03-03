@@ -10,7 +10,7 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image 
 
 
 > [!IMPORTANT]
-> All scripts and code are intended to run on Linux systems.
+> All scripts and code are intended to run on [Linux](https://github.com/torvalds/linux) systems.
 
 
 ## Overview
