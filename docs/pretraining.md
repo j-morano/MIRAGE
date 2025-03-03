@@ -41,9 +41,6 @@ This arguments can also be provided in a configuration file. See [_cfgs/pre_mira
 We also provide the utility script `runner` (see [docs/runner.md](../docs/runner.md)) to run multiple experiments easily by specifying multiple entries for the same argument.
 Below we provide an example to pretraing MIRAGE (both Base and Large) on the multimodal dataset.
 
-> [!TIP]
-> Run the script with the `-h` or `--help` flag to see the available options.
-
 
 ```bash
 ./runner python run_pretraining.py \
@@ -56,6 +53,10 @@ Below we provide an example to pretraing MIRAGE (both Base and Large) on the mul
         ./__weights/multimae-b_98_rgb+-depth-semseg_1600e_multivit-afff3f8c.pth \
         ./__weights/mae_pretrain_vit_large.pth
 ```
+
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
 
 > [!IMPORTANT]
 > The script uses the filename of the weights to determine which model configuration to use. In particular, the filename should contain the model name, so that the following substrings load the corresponding model configuration (case-insensitive):
