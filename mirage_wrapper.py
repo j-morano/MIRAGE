@@ -15,6 +15,7 @@ from mirage.input_adapters import PatchedInputAdapter, SemSegInputAdapter
 from mirage.output_adapters import SpatialOutputAdapter
 from mirage.model import MIRAGEModel
 from mirage.utils import pair
+from mutils.factory import get_factory_adder
 
 
 
@@ -51,7 +52,6 @@ class MIRAGEWrapper(nn.Module):
         modalities='bscan-slo-bscanlayermap',
         weights=None,
         device='cuda',
-        num_classes=0,
     ):
         super().__init__()
 
@@ -82,8 +82,11 @@ class MIRAGEWrapper(nn.Module):
 
         self.args = args
         self.model = self.get_model()
-        self.num_classes = num_classes
-        self.load_model(model_state_dict)
+        msg = self.model.load_state_dict(model_state_dict, strict=False)
+        # Print number of elements in each error message
+        print('  Missing keys:', len(msg.missing_keys))
+        print('  Unexpected keys:', len(msg.unexpected_keys))
+        assert len(msg.missing_keys) == 0
 
     def get_output_adapters(self) -> Union[None, dict]:
         return {
@@ -144,21 +147,6 @@ class MIRAGEWrapper(nn.Module):
 
         return model
 
-    def load_model(self, model_state_dict):
-        if self.num_classes > 0:
-            self.model.output_adapters = None
-            if 'large' in self.args.model:
-                embed_dim = 1024
-            else:
-                embed_dim = 768
-            self.norm = nn.LayerNorm(embed_dim, eps=1e-06, elementwise_affine=True)
-            self.head = nn.Linear(embed_dim, self.num_classes)
-            self.model.load_state_dict(model_state_dict, strict=False)
-            print('>> Loaded weights for classification with', self.num_classes, 'classes.')
-        else:
-            print('>> Loaded weights.')
-            self.model.load_state_dict(model_state_dict, strict=True)
-
     def forward(self, x: dict):
         """
         Args:
@@ -195,11 +183,27 @@ class MIRAGEWrapper(nn.Module):
         return next(self.parameters()).device
 
 
-class MIRAGECls(MIRAGEWrapper):
-    def __init__(self, *args, **kwargs):
+
+add_miragecls, miragecls_factory = get_factory_adder()
+
+
+@add_miragecls('global')
+class MIRAGEClsGlobal(MIRAGEWrapper):
+    def __init__(self, num_classes=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert self.num_classes > 0
+        assert num_classes > 0
         assert len(self.args.in_domains) == 1
+        self.num_classes = num_classes
+        self.model.output_adapters = None
+        # Get the embedding dimension from the first layer norm of the
+        #   type: (norm1): LayerNorm((768,), eps=1e-06, elementwise_affine=True)
+        self.embed_dim = self.model.encoder[0].norm1.normalized_shape[0]
+        self.norm = nn.LayerNorm(self.embed_dim, eps=1e-06, elementwise_affine=True)
+        print('  Embedding dimension:', self.embed_dim)
+        self.build_head()
+
+    def build_head(self, factor=1):
+        self.head = nn.Linear(self.embed_dim * factor, self.num_classes)
 
     def forward(self, x):
         """
@@ -213,11 +217,31 @@ class MIRAGECls(MIRAGEWrapper):
         x_d = {self.args.in_domains[0]: x}
         out, _masks = self.model(x_d, mask_inputs=False)
         out = self.norm(out)
-        out = out[:, :-self.args.num_global_tokens, :].mean(dim=1)
+        out = self.pool(out)
         return self.head(out)
+
+    def pool(self, x):
+        return x[:, :-self.args.num_global_tokens, :].mean(dim=1)
 
     def get_output_adapters(self):
         return None
+
+
+@add_miragecls('cls')
+class MIRAGEClsCLS(MIRAGEClsGlobal):
+    def pool(self, x):
+        return x[:, -self.args.num_global_tokens:, :].mean(dim=1)
+
+
+@add_miragecls('token_mix')
+class MIRAGEClsTokenMix(MIRAGEClsGlobal):
+    def build_head(self, factor=2):
+        super().build_head(factor)
+
+    def pool(self, x):
+        patch = x[:, :-self.args.num_global_tokens, :].mean(dim=1)
+        global_ = x[:, -self.args.num_global_tokens:, :].mean(dim=1)
+        return torch.cat([patch, global_], dim=1)
 
 
 def to_tensor(fn):

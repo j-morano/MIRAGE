@@ -5,7 +5,7 @@ from torch import nn
 import torchvision.transforms as tvtr
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
-from mirage_wrapper import MIRAGECls
+from mirage_wrapper import miragecls_factory
 from mutils.transforms import (
     RandomIntensityChannel,
     RandomAffineChannel,
@@ -137,7 +137,7 @@ class MIRAGEFM(FoundModel):
         if args.input_size is None:
             args.input_size = 512
 
-        self.model = MIRAGECls(
+        self.model = miragecls_factory[self.args.pool](
             input_size=args.input_size,
             patch_size=32,
             num_classes=args.num_classes,
