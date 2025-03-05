@@ -32,7 +32,7 @@ exit
 exit
 
 
-# Segmentation
+# Segmentation tuning
 ./runner python run_seg_tuning.py \
     --runners 1 \
     -- \
@@ -44,4 +44,14 @@ exit
         ./__weights/MIRAGE-Large.pth \
     --data_path \
         ./__datasets/Segmentation/Duke_DME/
+exit
+
+
+# Segmentation evaluation
+./runner python eval_seg.py \
+    --runners 1 \
+    -- \
+    --model_path \
+        ./__output/seg/v1/Duke_DME/MIRAGE-Base_frozen_convnext_CEGDice/ \
+        ./__output/seg/v1/Duke_DME/MIRAGE-Large_frozen_convnext_CEGDice/
 exit

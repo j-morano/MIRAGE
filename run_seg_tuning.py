@@ -56,7 +56,7 @@ def get_args():
         help='Batch size per GPU (default: %(default)s)'
     )
     parser.add_argument(
-        '--epochs', default=64, type=int,
+        '--epochs', default=200, type=int,
         help='Number of epochs to train (default: %(default)s)'
     )
     parser.add_argument(
@@ -436,9 +436,9 @@ def main(args):
         dataset_test = None
 
     if args.external is not None:
-        images_dir = Path(args.output_dir, f'images_{args.external}')
+        images_dir = Path(args.output_dir, f'preds_{args.external}')
     else:
-        images_dir = Path(args.output_dir, 'images')
+        images_dir = Path(args.output_dir, 'preds')
 
     if (
         args.infer_only
@@ -1008,9 +1008,9 @@ def evaluate(
     if log_images or infer_only:
         assert output_dir is not None
         if external is not None:
-            save_dir = Path(output_dir, f'images_{external}')
+            save_dir = Path(output_dir, f'preds_{external}')
         else:
-            save_dir = Path(output_dir, 'images')
+            save_dir = Path(output_dir, 'preds')
         save_dir.mkdir(exist_ok=True)
     else:
         save_dir = None
@@ -1049,8 +1049,7 @@ def evaluate(
             assert lookup_table is not None
             for i in range(len(sid)):
                 pred_i = lookup_table[seg_pred_argmax[i].long()].cpu().numpy().astype(np.uint8)
-                print('pred_i', pred_i.shape, pred_i.min(), pred_i.max())
-                io.imsave(save_dir / f'{sid[i]}_pred.png', pred_i)
+                io.imsave(save_dir / f'{sid[i]}.png', pred_i)
         else:
             assert loss is not None
             loss_value = loss.item()

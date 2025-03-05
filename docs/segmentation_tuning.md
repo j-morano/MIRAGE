@@ -55,6 +55,40 @@ You can specify a different output directory using the `--base_output_dir` argum
 > For RETFound and MedSAM weights, please check the corresponding repositories ([RETFound](https://github.com/rmaphoh/RETFound_MAE), [MedSAM](https://github.com/bowang-lab/MedSAM)).
 
 
+## Evaluation
+
+To evaluate the models on the segmentation tasks, first train the models using the script above, and then get the predictions on the test set using the same script with the `--infer_only` and `--test` flags, as shown below.
+
+```bash
+./runner python run_seg_tuning.py \
+    --runners 1 \
+    -- \
+    --version v1 \
+    --config \
+        ./_cfgs/seg_200e_convnext.yaml \
+    --weights \
+        ./__weights/MIRAGE-Base.pth \
+        ./__weights/MIRAGE-Large.pth \
+    --infer_only --test \
+    --data_path \
+        ./__datasets/Segmentation/Duke_DME/
+```
+
+Once the predictions are saved, you can evaluate the models using the `run_seg_eval.py` script, which computes volume Dice and IoU as well as 95% Hausdorff distance and saves the results in a CSV file.
+
+```bash
+./runner python eval_seg.py \
+    --runners 1 \
+    -- \
+    --model_path \
+        ./__output/seg/v1/Duke_DME/MIRAGE-Base_frozen_convnext_CEGDice/ \
+        ./__output/seg/v1/Duke_DME/MIRAGE-Large_frozen_convnext_CEGDice/
+```
+
+> [!TIP]
+> Run the script with the `-h` or `--help` flag to see the available options.
+
+
 ## Adding a new dataset
 
 To add a new dataset, you need to respect the dataset structure indicated in [docs/segmentation_benchmark.md](../docs/segmentation_benchmark.md).
