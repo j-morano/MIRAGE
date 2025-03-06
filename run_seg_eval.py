@@ -38,6 +38,13 @@ def get_args():
     )
     parser.add_argument('--no_ignore_bg', dest='ignore_bg', action='store_false')
     parser.set_defaults(ignore_bg=True)
+    parser.add_argument(
+        '--empty_sets_nan', action='store_true',
+        help='Return NaN if the prediction OR the ground truth is empty.'
+            ' (default: %(default)s)'
+    )
+    parser.add_argument('--no_empty_sets_nan', dest='empty_sets_nan', action='store_false')
+    parser.set_defaults(empty_sets_nan=True)
     return parser.parse_args()
 
 
@@ -63,7 +70,7 @@ def to_one_hot(y, num_classes=2):
     return y_onehot[np.newaxis]
 
 
-def volume_hausdorff_distance(y_pred, y_true, percentile=95):
+def volume_hausdorff_distance(y_pred, y_true, percentile=95, empty_sets_nan=True):
     hd95s = []
     for i in range(y_pred.shape[0]):
         unique_pred = np.unique(y_pred[i])
@@ -76,10 +83,13 @@ def volume_hausdorff_distance(y_pred, y_true, percentile=95):
             # If only one of them is empty, the distance is the diagonal
             #   length of the image, i.e., the maximum possible
             #   distance.
-            hd95 = np.sqrt(
-                np.power(y_true[i].shape[0], 2)
-                + np.power(y_true[i].shape[1], 2)
-            )
+            if empty_sets_nan:
+                hd95 = np.nan
+            else:
+                hd95 = np.sqrt(
+                    np.power(y_true[i].shape[0], 2)
+                    + np.power(y_true[i].shape[1], 2)
+                )
         else:
             hd95 = compute_hausdorff_distance(
                 to_one_hot(y_pred[i]),
@@ -87,7 +97,7 @@ def volume_hausdorff_distance(y_pred, y_true, percentile=95):
                 percentile=percentile
             ).item()
         hd95s.append(hd95)
-    return np.mean(hd95s)
+    return np.nanmean(hd95s)
 
 
 def print_mean_metrics(results_df):
@@ -233,7 +243,7 @@ def main():
             sc_pred = pred == sc
             sc_dice = dice_score(sc_pred, sc_gt)
             sc_iou = iou_score(sc_pred, sc_gt)
-            sc_hd95 = volume_hausdorff_distance(sc_pred, sc_gt, percentile=95)
+            sc_hd95 = volume_hausdorff_distance(sc_pred, sc_gt, 95, args.empty_sets_nan)
             results_df = pd.concat([
                 results_df,
                 pd.DataFrame({
