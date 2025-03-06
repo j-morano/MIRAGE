@@ -210,10 +210,11 @@ def main():
     for sc in sem_classes:
         if 'invalid' in sem_classes[sc].lower():
             invalid_classes.append(sc)
-        elif not (args.ignore_bg and 'bg' in sem_classes[sc].lower()
+        elif not (args.ignore_bg and (
+            'bg' in sem_classes[sc].lower()
             or 'background' in sem_classes[sc].lower()
             or 'above ilm' in sem_classes[sc].lower()
-        ):
+        )):
             fg_classes.append(sc)
 
     print('Foreground classes:', fg_classes)
