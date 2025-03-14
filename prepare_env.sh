@@ -197,7 +197,7 @@ function extract_files() {
     for file in $1/*.zip; do
         if [ -f $file ]; then
             echo '  📦 Extracting '$file
-            unzip -q $file -d $dir
+            python3 -m zipfile -e $file $dir
             remove $file
         fi
     done
