@@ -44,7 +44,7 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 
 ## Quick start
 
-For a quick start, use the provided script [prepare_env.sh](prepare_env.sh) to create a new python environment, install the required packages, and download the model weights and the datasets.
+For a quick start, use the provided script [prepare_env.py](prepare_env.py) to create a new python environment, install the required packages, and download the model weights and the datasets.
 
 > [!IMPORTANT]
 > The script will download the model weights and the datasets, which are large files. Make sure you have enough disk space and a stable internet connection.
@@ -53,7 +53,7 @@ For a quick start, use the provided script [prepare_env.sh](prepare_env.sh) to c
 
 
 ```bash
-./prepare_env.sh
+./prepare_env.py
 ```
 
 > [!TIP]
