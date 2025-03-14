@@ -15,7 +15,8 @@ MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image 
 
 ## Overview
 
-![Overview](https://github.com/user-attachments/assets/987652b1-6dd1-4d91-bb39-30e8acbfabf5)
+![Overview](https://github.com/user-attachments/assets/ca8bf9a4-a6ed-4a4e-9251-e6228bbc78cd)
+
 
 
 
