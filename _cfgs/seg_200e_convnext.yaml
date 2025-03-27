@@ -1,0 +1,34 @@
+# Input tasks
+in_domains: bscan
+
+# Architecture
+patch_size:
+  bscan: [32, 32]
+num_global_tokens: 1
+drop_path_encoder: 0.1
+output_adapter: convnext
+decoder_main_tasks: bscan
+
+# Train
+epochs: 200
+opt: adamw
+lr: 0.0001 # = 1e-4
+warmup_lr: 0.000001 # = 1e-6
+min_lr: 0.
+warmup_epochs: 1
+input_size:
+  bscan: [1024, 1024]
+layer_decay: 0.75
+batch_size: 4
+loss: CEGDice
+
+# Augmentation
+aug_name: simple
+
+# Data info
+seg_reduce_zero_label: False
+
+# Logging
+eval_freq: 1
+log_images: False
+log_images_freq: 20
