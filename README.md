@@ -154,7 +154,7 @@ If you find this repository useful, please consider giving it a star ⭐ and a c
 
 ## License
 
-This project is under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for details.
+The models and associated code are released under the CC-BY-NC-ND 4.0 license and may only be used for non-commercial, academic research purposes with proper attribution. See [LICENSE](LICENSE) for more details.
 
 
 
