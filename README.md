@@ -39,21 +39,6 @@ We evaluated the model on a comprehensive benchmark consisting of 19 tasks from 
 Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundation models across all task types.
 
 
-## TODO
-
-- [x] Basic code to load the model and run inference
-- [x] Model weights
-- [x] Downstream classification datasets
-- [x] Downstream segmentation datasets
-- [x] Classification tuning code
-- [x] Classification evaluation code
-- [x] Segmentation tuning code
-- [x] Segmentation evaluation code
-- [x] Detailed documentation
-- [x] Quick start script
-- [x] Pretraining code
-
-
 
 ## Quick start
 
