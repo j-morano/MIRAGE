@@ -1,12 +1,15 @@
+<a href=https://arxiv.org/abs/2506.08900><img src="https://img.shields.io/badge/arxiv-2506.08900-red?logo=arxiv&logoColor=white"/></a>
+
 # MIRAGE
 
-This repository contains the code for the paper "MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis", submitted to _npj Digital Medicine_.
+This repository contains the code for the paper "MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis", under review in _npj Digital Medicine_.
+
+#### [[`arXiv`](https://arxiv.org/abs/2506.08900)]
+<br>
+
 
 MIRAGE is a multimodal foundation model for comprehensive retinal OCT/SLO image analysis. It is trained on a large-scale dataset of multimodal data, and is designed to perform a wide range of tasks, including disease staging, diagnosis, and layer and lesion segmentation. MIRAGE is based on the [MultiMAE](https://github.com/EPFL-VILAB/MultiMAE) architecture, and is pre-trained using a multi-task learning strategy. The model, based on [ViT](https://github.com/google-research/vision_transformer), is available in two sizes: MIRAGE-Base and MIRAGE-Large. The code in this repository provides the model weights and the code to run inference.
 
-
-<!-- > [!NOTE] -->
-<!-- > This repository is under construction. Check the [TODO](#todo) section for the current status. -->
 
 
 > [!IMPORTANT]
@@ -38,8 +41,6 @@ Our foundation model, MIRAGE, significantly outperforms state-of-the-art foundat
 - [x] Quick start script
 - [x] Pretraining code
 
-<!-- - [ ] Detailed classification results -->
-<!-- - [ ] Detailed segmentation results -->
 
 
 ## Quick start
