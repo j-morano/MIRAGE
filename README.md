@@ -1,6 +1,15 @@
-<a href=https://arxiv.org/abs/2506.08900><img src="https://img.shields.io/badge/arxiv-2506.08900-red?logo=arxiv&logoColor=white"/></a>
+<a href=https://arxiv.org/abs/2506.08900><img src="https://img.shields.io/badge/arXiv-2506.08900-red?logo=arXiv&logoColor=white"/></a>
 
-# MIRAGE
+# <p align="center">MIRAGE</p>
+
+<p align="center">
+    <a href="#quick-start">Quick Start</a> •
+    <a href="#model-weights">Weights</a> •
+    <a href="#inference">Inference</a> •
+    <a href="#evaluation-benchmark">Benchmark</a> •
+    <a href="#tuning">Tuning</a> •
+    <a href="#citation">Citation</a>
+</p>
 
 This repository contains the code for the paper "MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis", under review in _npj Digital Medicine_.
 
@@ -87,8 +96,8 @@ The model weights are available in the [Model weights release](https://github.co
 
 | Model | Link |
 | --- | --- |
-| MIRAGE-Base | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Base.pth) |
-| MIRAGE-Large | [Weights](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Large.pth) |
+| MIRAGE-Base | [Weights-Base](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Base.pth) |
+| MIRAGE-Large | [Weights-Large](https://github.com/j-morano/MIRAGE/releases/download/weights/MIRAGE-Large.pth) |
 
 
 ## Inference
@@ -136,20 +145,14 @@ If you have any questions or find problems with the code, please open an issue o
 If you find this repository useful, please consider giving it a star ⭐ and a citation 📝:
 
 ```
-@article{morano2025mirage,
-  title={{MIRAGE}: A multimodal foundation model and benchmark for comprehensive retinal {OCT} image analysis},
-  author={José Morano
-  and Botond Fazekas
-  and Emese Sükei
-  and Ronald Fecso
-  and Taha Emre
-  and Markus Gumpinger
-  and Georg Faustmann
-  and Marzieh Oghbaie
-  and Ursula Schmidt-Erfurth
-  and Hrvoje Bogunović},
-  journal={Preprint},
-  year={2025}
+@misc{morano2025mirage,
+    title={{MIRAGE}: Multimodal foundation model and benchmark for comprehensive retinal {OCT} image analysis},
+    author={José Morano and Botond Fazekas and Emese Sükei and Ronald Fecso and Taha Emre and Markus Gumpinger and Georg Faustmann and Marzieh Oghbaie and Ursula Schmidt-Erfurth and Hrvoje Bogunović},
+    year={2025},
+    eprint={2506.08900},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    url={https://arxiv.org/abs/2506.08900},
 }
 ```
 
