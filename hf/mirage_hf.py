@@ -699,12 +699,12 @@ class MIRAGEWrapper(nn.Module):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_size', type=str, default='base', help='Model size', choices=['base', 'large'])
+    parser.add_argument('--size', type=str, default='base', help='Model size', choices=['base', 'large'])
     parser.add_argument('--device', type=str, default='cuda', help='Device to use', choices=['cuda', 'cpu'])
-    parser.add_argument('--input_modalities', type=str, default='bscan', help='Input modality', choices=['bscan', 'slo', 'bscan-slo'])
+    parser.add_argument('--modalities', type=str, default='bscan', help='Input modality', choices=['bscan', 'slo', 'bscan-slo'])
     args = parser.parse_args()
 
-    input_modalities = args.input_modalities.split('-')
+    input_modalities = args.modalities.split('-')
 
     bscan_link = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Macular_OCT_depicting_Central_Serous_Chorioretinopathy_in_the_Left_Eye.png'
     slo_link = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Ocular_OCT_OS_IR30_overlay.jpg'
@@ -720,15 +720,15 @@ if __name__ == "__main__":
         print(f'  {domain}: {tensor.shape}, min: {tensor.min()}, max: {tensor.max()}')
 
     # NOTE: ViT-Base and ViT-Large versions of MIRAGE are available
-    if args.model_size == 'base':
-        weights = './__weights/MIRAGE-Base.pth'
+    if args.size == 'base':
+        weights = '../__weights/MIRAGE-Base.pth'
     else:
-        weights = './__weights/MIRAGE-Large.pth'
+        weights = '../__weights/MIRAGE-Large.pth'
 
     model = MIRAGEWrapper()
     model.eval()
 
-    state_dict = torch.load("__weights/MIRAGE-Base.pth", map_location='cpu', weights_only=False)
+    state_dict = torch.load(weights, map_location='cpu', weights_only=False)
     model_state_dict = state_dict["model"]
     msg = model.model.load_state_dict(model_state_dict, strict=False)
     print('  # Missing keys:', len(msg.missing_keys))
