@@ -58,6 +58,37 @@ For a quick start, use the provided script [prepare_env.py](prepare_env.py) to c
 > Run the script with the `-h` or `--help` flag to see the available options.
 
 
+### Basic usage with Hugging Face 🤗
+
+The models can be easily used with the `hf/mirage_hf.py` code and loading the weights with Hugging Face 🤗. The only requirement is having the `torch`, `einops`, `huggingface_hub`, and `safetensors` packages installed.
+
+```python
+from huggingface_hub import PyTorchModelHubMixin
+from mirage_hf import MIRAGEWrapper
+
+
+class MIRAGEhf(MIRAGEWrapper, PyTorchModelHubMixin):
+    def __init__(
+        self,
+        input_size=512,
+        patch_size=32,
+        modalities='bscan-slo',
+        size='base',
+    ):
+        super().__init__(
+            input_size=input_size,
+            patch_size=patch_size,
+            modalities=modalities,
+            size=size,
+        )
+
+# For the MIRAGE model based on ViT-Base
+model = MIRAGEhf.from_pretrained("j-morano/MIRAGE-Base")
+# For the MIRAGE model based on ViT-Large
+model = MIRAGEhf.from_pretrained("j-morano/MIRAGE-Large")
+```
+
+
 ## Requirements
 
 > [!NOTE]
