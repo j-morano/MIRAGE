@@ -12,7 +12,7 @@
     <a href="#citation">Citation</a>
 </p>
 
-This repository contains the code for the paper "MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis", under review in _npj Digital Medicine_.
+This repository contains the code for the paper "MIRAGE: A multimodal foundation model and benchmark for comprehensive retinal OCT image analysis".
 
 #### [[`arXiv`](https://arxiv.org/abs/2506.08900)]
 <br>
