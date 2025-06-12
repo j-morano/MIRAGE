@@ -1,6 +1,7 @@
 <a href=https://arxiv.org/abs/2506.08900><img src="https://img.shields.io/badge/arXiv-2506.08900-red?logo=arXiv&logoColor=white"/></a>
 
-# <p align="center">MIRAGE</p>
+![MIRAGE](https://github.com/user-attachments/assets/c00d2553-a2ad-4bf6-bae0-07d598a1be25)
+
 
 <p align="center">
     <a href="#quick-start">Quick Start</a> •
