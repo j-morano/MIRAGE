@@ -1,7 +1,7 @@
 ---
 license: cc-by-nc-nd-4.0
 library_name: pytorch
-pipeline_tag: image-to-image
+pipeline_tag: image-feature-extraction
 tags:
 - OCT
 - SLO
