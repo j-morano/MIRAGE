@@ -1,8 +1,9 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2506.08900-red?logo=arXiv&logoColor=white)](https://arxiv.org/abs/2506.08900)
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+[![arXiv](https://img.shields.io/badge/🤗 Hugging Face-MIRAGE-blue)](https://huggingface.co/j-morano/MIRAGE-Large)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-darkgreen.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 
-![MIRAGE](https://github.com/user-attachments/assets/c00d2553-a2ad-4bf6-bae0-07d598a1be25)
+![MIRAGE](https://github.com/user-attachments/assets/b447d34a-3a54-4115-840c-35d70c14ebb2)
 
 
 <p align="center">
