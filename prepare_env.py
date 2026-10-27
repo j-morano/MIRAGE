@@ -225,9 +225,6 @@ def main():
                 download_to_dir(f'{BASE_URL}/seg-data/Duke_iAMD_labeled_part_{part}', dir)
             join_dataset(dir, 'Duke_iAMD_labeled', nodelete=args.nodelete)
         download_to_dir(f'{BASE_URL}/seg-data/GOALS.zip', dir)
-        for part in ['aa', 'ab']:
-            download_to_dir(f'{BASE_URL}/seg-data/RETOUCH_part_{part}', dir)
-        join_dataset(dir, 'RETOUCH', nodelete=args.nodelete)
         extract_files(dir, nodelete=args.nodelete)
 
     print('\n🎉 Environment ready!')

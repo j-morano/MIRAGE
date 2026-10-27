@@ -13,7 +13,6 @@ The links below are direct download from the release page.
 | Duke DME | [Full dataset](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_DME.zip) |
 | Duke iAMD | [Part A](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_aa) - [Part B](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ab) - [Part C](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ac) - [Part D](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ad) - [Part E](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ae) - [Part F](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_af) - [Part G](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ag) - [Part H](https://github.com/j-morano/MIRAGE/releases/download/seg-data/Duke_iAMD_labeled_part_ah) |
 | GOALS | [Full dataset](https://github.com/j-morano/MIRAGE/releases/download/seg-data/GOALS.zip) |
-| RETOUCH | [Part A](https://github.com/j-morano/MIRAGE/releases/download/seg-data/RETOUCH_part_aa) - [Part B](https://github.com/j-morano/MIRAGE/releases/download/seg-data/RETOUCH_part_ab) |
 
 
 > [!IMPORTANT]
@@ -24,7 +23,7 @@ The links below are direct download from the release page.
 
 ### Training and evaluation dataset
 
-AROI, Duke DME, GOALS, and RETOUCH datasets.
+AROI, Duke DME, and GOALS datasets.
 
 `bscan/` contains the B-scans and `semseg/` contains the segmentation masks, both in PNG format and with the same names.
 `INFO.json` contains mapping of the classes to the intensity values in the segmentation maps and the full class names.
@@ -80,7 +79,7 @@ Example `INFO.json` (from GOALS):
 ```
 
 > [!IMPORTANT]
-> RETOUCH dataset does not have a `semseg` folder under `test` because the test segmentation masks are not available. The evaluation was performed on the Grand Challenge platform (<https://retouch.grand-challenge.org/>).
+> RETOUCH dataset is not included due to data restrictions. Please refer to the Grand Challenge platform (<https://retouch.grand-challenge.org/>).
 
 
 ### Evaluation-only dataset
@@ -103,25 +102,22 @@ Dataset/
 
 ## Large datasets
 
-Large datasets (Duke iAMD and RETOUCH) are split into multiple parts using the Linux `split` command.
+Large datasets (Duke iAMD) are split into multiple parts using the Linux `split` command.
 
 ```shell
 split -b $(( $(stat -c%s Duke_iAMD_labeled.zip) / 8 + 1 )) Duke_iAMD_labeled.zip Duke_iAMD_labeled_part_
-split -b $(( $(stat -c%s RETOUCH.zip) / 2 + 1 )) RETOUCH.zip RETOUCH_part_
 ```
 
 To reassemble the parts, run:
 
 ```shell
 cat Duke_iAMD_labeled_part_* > Duke_iAMD_labeled.zip
-cat RETOUCH_part_* > RETOUCH.zip
 ```
 
 In windows, use the `copy` command in the Command Prompt (cmd):
 
 ```shell
 copy /b Duke_iAMD_labeled_part_* Duke_iAMD_labeled.zip
-copy /b RETOUCH_part_* RETOUCH.zip
 ```
 
 
