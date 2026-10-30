@@ -1,5 +1,5 @@
 ---
-license: cc-by-nc-nd-4.0
+license: cc-by-nc-4.0
 library_name: pytorch
 pipeline_tag: image-feature-extraction
 tags:
