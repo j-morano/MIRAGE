@@ -1,7 +1,7 @@
 [![npj Digital Medicine](https://img.shields.io/badge/npj-Digital_Medicine-red)](https://doi.org/10.1038/s41746-025-01852-3)
 [![arXiv](https://img.shields.io/badge/arXiv-2506.08900-red?logo=arXiv&logoColor=white)](https://arxiv.org/abs/2506.08900)
 [![HF](https://img.shields.io/badge/🤗_Hugging_Face-MIRAGE-blue)](https://huggingface.co/j-morano/models)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC_BY--NC_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 
 
 ![MIRAGE](https://github.com/user-attachments/assets/b447d34a-3a54-4115-840c-35d70c14ebb2)
@@ -195,7 +195,7 @@ If you find this repository useful, please consider giving it a star ⭐ and a c
 
 ## License
 
-The models and associated code are released under the CC BY 4.0 license and can be freely used for research and commercial purposes, provided that appropriate credit is given to the original authors. See [LICENSE](LICENSE) for more details.
+The models and associated code are released under the CC-BY-NC 4.0 license and may only be used for non-commercial, academic research purposes with proper attribution. See [LICENSE](LICENSE) for more details.
 
 
 
