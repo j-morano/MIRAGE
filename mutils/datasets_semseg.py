@@ -39,6 +39,21 @@ class ToRange(A.ImageOnlyTransform):
         return ()
 
 
+class MinMaxNormalize(A.ImageOnlyTransform):
+    def __init__(self, p=1.0):
+        super(MinMaxNormalize, self).__init__(p)
+
+    def apply(self, img, **_params):
+        min_val, max_val = np.min(img), np.max(img)
+        if max_val == min_val:
+            return img - min_val
+        img = (img - min_val) / (max_val - min_val)
+        return img
+
+    def get_transform_init_args_names(self):
+        return ()
+
+
 def simple_transform(
     train: bool,
     additional_targets: Dict[str, str],
@@ -54,7 +69,16 @@ def simple_transform(
         print("Using imagenet normalization")
         norm_list += [
             ToRGB(p=1),
-            A.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),
+            A.Normalize(
+                mean=IMAGENET_DEFAULT_MEAN,
+                std=IMAGENET_DEFAULT_STD,
+                max_pixel_value=1.0,
+            ),
+        ]
+    elif norm == 'minmax':
+        print("Using minmax normalization")
+        norm_list += [
+            MinMaxNormalize(p=1),
         ]
     elif norm == 'sam':
         print("Using SAM normalization")
@@ -67,7 +91,7 @@ def simple_transform(
         print("Using z-score normalization")
         norm_list += [
             ToRGB(p=1),
-            A.Normalize(mean=0, std=1),
+            A.Normalize(mean=0, std=1, max_pixel_value=1.0),
         ]
     else:
         # No extra operations needed

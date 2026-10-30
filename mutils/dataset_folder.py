@@ -53,7 +53,11 @@ def make_nonclass_dataset(
 
 def normalize_to_0_1(sample: np.ndarray) -> np.ndarray:
     """Normalize to 0-1 range data with any range (positive values)."""
-    return (sample - np.min(sample)) / (np.max(sample) - np.min(sample))
+    if np.max(sample) > 255.0:
+        sample = sample / 65535.0
+    elif np.max(sample) > 1.0:
+        sample = sample / 255.0
+    return sample
 
 
 class MultiTaskDatasetFolder(VisionDataset):
