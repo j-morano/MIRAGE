@@ -68,7 +68,7 @@ To evaluate the models on the segmentation tasks, first train the models using t
         ./__datasets/Segmentation/Duke_DME/
 ```
 
-Once the predictions are saved, you can evaluate the models using the `run_seg_eval.py` script, which computes volume Dice and IoU as well as 95% Hausdorff distance and saves the results in a CSV file.
+Once the predictions are saved, you can evaluate the models using the `run_seg_eval.py` script, which computes volume Dice and IoU as well as 95% Hausdorff distance (per B-scan) and saves the results in `results_summary.json`, `results_volume.csv`, and `results_hd95.csv`.
 
 ```bash
 ./runner python eval_seg.py \

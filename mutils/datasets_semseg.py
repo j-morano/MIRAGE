@@ -32,7 +32,9 @@ class ToRange(A.ImageOnlyTransform):
 
     def apply(self, img, **_params):
         min_val, max_val = np.min(img), np.max(img)
-        img = img * (self.range[1] - self.range[0]) / (max_val - min_val) + self.range[0]
+        if max_val == min_val:
+            return img - min_val + self.range[0]
+        img = (img - min_val) * (self.range[1] - self.range[0]) / (max_val - min_val) + self.range[0]
         return img
 
     def get_transform_init_args_names(self):
